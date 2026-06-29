@@ -1853,10 +1853,12 @@ function openEditItem(id){
   document.getElementById('f-weight').value=item.weight_grams||'';
   document.getElementById('f-quantity').value=item.quantity||1;
   document.getElementById('f-description').value=stripVariants(item.notes)||'';
-  currentPhotoData=String(item.photo_url||'');
+  currentPhotoData = (item.photo_url === null || item.photo_url === undefined) ? '' : String(item.photo_url);
   const urlField=document.getElementById('f-photo-url');
   if(urlField) urlField.value = currentPhotoData.startsWith('http') ? currentPhotoData : '';
-  if(currentPhotoData){const p=document.getElementById('photo-preview');p.src=currentPhotoData;p.style.display='block';}
+  const pp=document.getElementById('photo-preview');
+  if(currentPhotoData && pp){pp.src=currentPhotoData;pp.style.display='block';}
+  else if(pp){pp.src='';pp.style.display='none';}
   selectedColours=parseVariants(item.notes).map(v=>({...v}));
   renderPresets();renderSelectedList();
   openModal('item-modal');
