@@ -1043,10 +1043,10 @@ function renderItemCard(item) {
   const dots=v.length?`<div class="colour-dots">${v.map(x=>`<span class="colour-dot ${x.qty==0?'out-variant':''}"><span class="dot" style="background:${esc(x.hex||getHex(x.name))}"></span>${esc(x.name)} (${x.qty})</span>`).join('')}</div>`:'';
   const vrows=v.map(x=>{
     const vq=Math.round(Number(x.qty||0)),vc=vq===0?'out':vq<=LOW_STOCK_THRESHOLD?'low':'';
-    return`<div class="variant-row"><div class="variant-colour-info"><div class="variant-dot" style="background:${esc(x.hex||getHex(x.name))}"></div><span class="variant-name">${esc(x.name)}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="variant-qty-num ${vc}">${vq}</span><div class="variant-btns"><button class="v-btn v-btn-in" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',1)">+</button><button class="v-btn v-btn-out" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',-1)">−</button></div></div></div>`;
+    return`<div class="variant-row"><div class="variant-colour-info"><div class="variant-dot" style="background:${esc(x.hex||getHex(x.name))}"></div><span class="variant-name">${esc(x.name)}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="variant-qty-num ${vc}">${vq}</span><div class="variant-btns"><button class="v-btn v-btn-in" data-action="vqty-in" data-id="${item.item_id}" data-colour="${esc(x.name)}">+</button><button class="v-btn v-btn-out" data-action="vqty-out" data-id="${item.item_id}" data-colour="${esc(x.name)}">−</button></div></div></div>`;
   }).join('');
   return`<div class="item-card ${cc}" id="card-${item.item_id}">
-    <div class="item-card-inner" onclick="openDetail('${item.item_id}')">
+   <div class="item-card-inner" data-action="detail" data-id="${item.item_id}">
       ${ph}<div class="item-info">
         <div class="item-name">${esc(item.name)}</div>
         <div class="item-meta">${esc(item.category||'')}${item.material?' · '+esc(item.material):''}</div>
@@ -1054,12 +1054,12 @@ function renderItemCard(item) {
           <div class="price-tag"><span>${t('costLabel')}</span><span class="val">R$ ${fp(item.purchase_price)}</span></div>
           <div class="price-tag"><span>${t('sellLabel')}</span><span class="val">R$ ${fp(item.sale_price)}</span></div>
         </div>${dots}</div></div>
-    ${v.length?`<div class="variants-panel" id="vp-${item.item_id}">${vrows}</div><div class="expand-row" onclick="toggleV('${item.item_id}')"><span id="el-${item.item_id}">${t('showColours')}</span></div>`:''}
+    ${v.length?`<div class="variants-panel" id="vp-${item.item_id}">${vrows}</div><div class="expand-row" data-action="expand" data-id="${item.item_id}"><span id="el-${item.item_id}">${t('showColours')}</span></div>`:''}
     <div class="item-footer"><span class="qty-badge ${qc}">${ql}</span>
-      <div class="item-actions" onclick="event.stopPropagation()">
-        <button class="action-btn btn-in" onclick="openStockUpdate('${item.item_id}','in')">＋ ${t('addedTab')}</button>
-        <button class="action-btn btn-out" onclick="openStockUpdate('${item.item_id}','out')">－ ${t('removedTab')}</button>
-        <button class="action-btn btn-edit" onclick="openEditItem('${item.item_id}')">${currentLang==='pt'?'Editar':'Edit'}</button>
+      <div class="item-actions">
+        <button class="action-btn btn-in" data-action="stock-in" data-id="${item.item_id}">＋ ${t('addedTab')}</button>
+        <button class="action-btn btn-out" data-action="stock-out" data-id="${item.item_id}">－ ${t('removedTab')}</button>
+        <button class="action-btn btn-edit" data-action="edit" data-id="${item.item_id}">${currentLang==='pt'?'Editar':'Edit'}</button>
       </div></div></div>`;
 }
 
@@ -2174,6 +2174,22 @@ function showToast(msg,type=''){
   const el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className='';},3000);
 }
+document.getElementById('main-content').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+
+  const action = btn.dataset.action;
+  const id     = btn.dataset.id;
+  const colour = btn.dataset.colour;
+
+  if(action === 'detail')    { openDetail(id); }
+  if(action === 'stock-in')  { openStockUpdate(id, 'in'); }
+  if(action === 'stock-out') { openStockUpdate(id, 'out'); }
+  if(action === 'edit')      { openEditItem(id); }
+  if(action === 'expand')    { toggleV(id); }
+  if(action === 'vqty-in')   { qvu(id, colour, 1); }
+  if(action === 'vqty-out')  { qvu(id, colour, -1); }
+});
 </script>
 </body>
 </html>
