@@ -1885,10 +1885,11 @@ async function saveItem(){
     qty=totalVQty(selectedColours);
   }
   // Use URL field if no local photo captured
-  const urlFieldVal = document.getElementById('f-photo-url')?.value?.trim()||'';
-  if(urlFieldVal && !currentPhotoData) currentPhotoData = urlFieldVal;
+const urlFieldVal = document.getElementById('f-photo-url')?.value?.trim()||'';
+if(urlFieldVal && !currentPhotoData) currentPhotoData = urlFieldVal;
+currentPhotoData = String(currentPhotoData||'');
 
-  const params={
+const params={
     name,category:document.getElementById('f-category').value,
     material:document.getElementById('f-material').value,
     purchase_price:document.getElementById('f-purchase-price').value,
