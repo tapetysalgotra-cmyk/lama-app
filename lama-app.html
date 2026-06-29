@@ -365,7 +365,7 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
     <div class="login-setup-link" onclick="toggleSetup()">⚙ Configurar URL da API</div>
   </div>
 
-  <div class="login-footer">Desenvolvido para <span>Studio LAMA Design</span></div>
+  <div class="login-footer">Desenvolvido para <span>Sapphire Studio</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -1725,7 +1725,6 @@ function saveEmailTime(time){
   localStorage.setItem('lama_email_time', time);
   callApi({action:'setEmailTime', time});
   showToast(currentLang==='pt'?'Horário salvo ✓':'Time saved ✓','success');
-}
 }
 
 async function sendReportNow(){
