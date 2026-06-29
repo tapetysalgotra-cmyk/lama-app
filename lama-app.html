@@ -52,6 +52,11 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:10px
 .icon-btn:active{opacity:.7;}
 .logout-btn{padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:.68rem;font-weight:500;cursor:pointer;letter-spacing:.03em;}
 .logout-btn:active{opacity:.7;}
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle{display:flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface);flex-shrink:0;}
+.lang-btn{display:flex;align-items:center;gap:3px;padding:5px 8px;font-size:.62rem;font-weight:600;cursor:pointer;color:var(--muted);letter-spacing:.04em;transition:background .15s,color .15s;white-space:nowrap;}
+.lang-btn.active{background:var(--gold);color:#fff;}
+.lang-btn .flag{font-size:.85rem;line-height:1;}
 
 /* ── STATS BAR ── */
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
@@ -352,15 +357,19 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
       <span class="role-badge" id="role-badge">Admin</span>
     </div>
     <div class="header-actions">
+      <div class="lang-toggle">
+        <div class="lang-btn active" id="lang-en" onclick="setLang('en')"><span class="flag">🇬🇧</span> EN</div>
+        <div class="lang-btn" id="lang-pt" onclick="setLang('pt')"><span class="flag">🇧🇷</span> PT</div>
+      </div>
       <div class="icon-btn" onclick="toggleDark()" id="dark-btn" title="Tema">🌙</div>
-      <button class="logout-btn" onclick="doLogout()">Sair</button>
+      <button class="logout-btn" onclick="doLogout()" id="logout-btn-main">Sair</button>
     </div>
   </header>
 
   <div class="stats-bar" id="stats-bar">
-    <div class="stat"><div class="stat-value" id="stat-items">—</div><div class="stat-label">Itens</div></div>
-    <div class="stat"><div class="stat-value" id="stat-qty">—</div><div class="stat-label">Em Estoque</div></div>
-    <div class="stat"><div class="stat-value" id="stat-value">—</div><div class="stat-label">Valor</div></div>
+    <div class="stat"><div class="stat-value" id="stat-items">—</div><div class="stat-label" id="stat-label-items">Items</div></div>
+    <div class="stat"><div class="stat-value" id="stat-qty">—</div><div class="stat-label" id="stat-label-qty">In Stock</div></div>
+    <div class="stat"><div class="stat-value" id="stat-value">—</div><div class="stat-label" id="stat-label-value">Value</div></div>
   </div>
 
   <div class="tabs" id="main-tabs">
@@ -406,7 +415,7 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
     <div class="modal-body">
       <input type="hidden" id="edit-item-id" />
       <div class="form-group">
-        <label class="form-label">Foto <span style="color:var(--muted);font-size:.68rem;text-transform:none">(salva localmente)</span></label>
+        <label class="form-label" id="lbl-photo">Photo <span style="color:var(--muted);font-size:.68rem;text-transform:none" id="lbl-photo-note">(saved locally)</span></label>
         <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
           <input type="file" id="photo-input" accept="image/*" capture="environment" onchange="handlePhotoSelect(this)" style="display:none" />
           <div style="font-size:1.8rem;margin-bottom:4px">📷</div>
@@ -415,36 +424,36 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Nome do Item *</label>
-        <input class="form-input" id="f-name" placeholder="ex. Brinco Círculo" />
+        <label class="form-label" id="lbl-name">Item Name *</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Circle Earring" />
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Categoria</label>
-          <select class="form-select" id="f-category"><option value="">Selecionar...</option></select>
+          <label class="form-label" id="lbl-category">Category</label>
+          <select class="form-select" id="f-category"><option value="">Select...</option></select>
         </div>
         <div class="form-group">
-          <label class="form-label">Material</label>
-          <input class="form-input" id="f-material" placeholder="ex. Aço Cirúrgico" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Preço de Custo (R$)</label>
-          <input class="form-input" id="f-purchase-price" type="number" placeholder="0,00" min="0" step="0.01" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Preço de Venda (R$)</label>
-          <input class="form-input" id="f-sale-price" type="number" placeholder="0,00" min="0" step="0.01" />
+          <label class="form-label" id="lbl-material">Material</label>
+          <input class="form-input" id="f-material" placeholder="e.g. Surgical Steel" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Peso (gramas)</label>
+          <label class="form-label" id="lbl-purchase">Cost Price (R$)</label>
+          <input class="form-input" id="f-purchase-price" type="number" placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-sale">Sale Price (R$)</label>
+          <input class="form-input" id="f-sale-price" type="number" placeholder="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="lbl-weight">Weight (grams)</label>
           <input class="form-input" id="f-weight" type="number" placeholder="0.0" min="0" step="0.1" />
         </div>
         <div class="form-group">
-          <label class="form-label">Qtd. (sem cores)</label>
+          <label class="form-label" id="lbl-qty-nocolour">Qty (no colours)</label>
           <input class="form-input" id="f-quantity" type="number" placeholder="1" min="0" value="1" />
         </div>
       </div>
@@ -621,11 +630,156 @@ const PRESET_COLOURS=[
   {name:'Rosa',hex:'#e0748a'},{name:'Marrom',hex:'#8b5c2a'},{name:'Laranja',hex:'#e06820'},
   {name:'Amarelo',hex:'#d4a800'},{name:'Turquesa',hex:'#00897b'}
 ];
-const CHANNELS=['Site','Loja Física','Feira/Evento','Retirada','Instagram','Outro'];
+const CHANNELS_PT=['Site','Loja Física','Feira/Evento','Retirada','Instagram','Outro'];
+const CHANNELS_EN=['Website','Physical Store','Trade Show / Event','Pickup','Instagram','Other'];
+
+// ── TRANSLATIONS ──
+const T = {
+  en:{
+    logout:'Sign out', inventory:'Inventory', sales:'Sales', customers:'Customers',
+    reports:'Reports', users:'Users', settings:'Settings',
+    statItems:'Items', statQty:'In Stock', statValue:'Value',
+    searchPlaceholder:'Search items...', filterAll:'All',
+    newItem:'New Item', editItem:'Edit Item', addToStock:'Add to Stock',
+    saveChanges:'Save Changes', removeItem:'Remove Item',
+    updateStock:'Update Stock', confirm:'Confirm',
+    itemDetail:'Item Details', category:'Category', material:'Material',
+    purchasePrice:'Cost Price (R$)', salePrice:'Sale Price (R$)',
+    weight:'Weight (grams)', qtyNoColour:'Qty (no colours)',
+    colourVariants:'Colour Variants', optional:'(optional)',
+    addCustom:'Add', customPlaceholder:'Custom colour...',
+    notes:'Description / Notes', notesPlaceholder:'Hallmark, size, condition, supplier...',
+    photo:'Photo', photoNote:'(saved locally on this device)',
+    uploadText:'Tap to take photo or choose from gallery',
+    newSale:'New Sale', addItem:'Add Item', total:'Total',
+    salesChannel:'Sales Channel *', customer:'Customer',
+    customerPlaceholder:'Customer name...', phone:'Phone',
+    email:'Email', paymentMethod:'Payment Method', salesperson:'Salesperson',
+    confirmSale:'Confirm Sale', noSales:'No sales recorded yet.\nTap + to register a sale.',
+    noItems:'No items found.\nTap + to add your first item.',
+    noCustomers:'No customers yet.\nTap + to add one.',
+    allStocked:'All items well stocked!',
+    newCustomer:'New Customer', editCustomer:'Edit Customer',
+    saveCustomer:'Save Customer', removeCustomer:'Remove Customer',
+    fullName:'Full Name *', namePlaceholder:'Full name',
+    customerNotes:'Notes', customerNotesPlaceholder:'Birthday, preferences...',
+    newUser:'New User', editUser:'Edit User',
+    saveUser:'Save User', removeUser:'Remove User',
+    userFullName:'Full Name *', username:'Username (login) *',
+    usernamePlaceholder:'e.g. maria.silva', password:'Password *',
+    passwordPlaceholder:'Minimum 6 characters', role:'Role',
+    roleSales:'Salesperson', roleAdmin:'Administrator',
+    reportsTitle:'Reports', from:'From:', to:'To:',
+    revenue:'Revenue', salesCount:'Sales', itemsSold:'Items Sold',
+    estimatedProfit:'Est. Profit', byChannel:'By Sales Channel',
+    topItems:'Top Selling Items', bySalesperson:'By Salesperson',
+    currentStock:'Current Stock', stockCost:'Total stock cost',
+    stockValue:'Stock sale value', totalItems:'Total different items',
+    noData:'No data', dailyReport:'Daily Email Report',
+    autoSend:'Automatic send', autoSendSub:'Every day at 22:30 (Recife time)',
+    active:'✓ Active', sendNow:'Send report now', sendNowSub:'Sends today\'s report',
+    send:'Send', connection:'Connection', apiUrl:'API URL', change:'Change',
+    appearance:'Appearance', darkTheme:'Dark theme', stockLayout:'Stock layout',
+    grid:'Grid', list:'List', inStock:'In Stock', outOfStock:'Out of stock',
+    qty:'Qty', showColours:'▸ Show colours', hideColours:'▾ Hide colours',
+    colourStock:'Colour Stock', costLabel:'Cost', sellLabel:'Sell',
+    added:'Added', addedTab:'Add', removedTab:'Remove',
+    saving:'Saving...', itemAdded:'Item added ✓', itemUpdated:'Item updated ✓',
+    itemRemoved:'Item removed', stockUpdated:'Stock updated ✓',
+    saleRegistered:'Sale registered ✓', customerSaved:'Customer saved ✓',
+    customerRemoved:'Customer removed', userSaved:'User saved ✓', userRemoved:'User removed',
+    reportSent:'Report sent ✓', sendingReport:'Sending report...',
+    nameRequired:'Name is required', itemNameRequired:'Item name is required',
+    addAtLeastOne:'Add at least one item', selectChannel:'Select a sales channel',
+    passwordRequired:'Password required for new user',
+    usernameRequired:'Name and username are required',
+    confirmDeleteItem:'Remove "{name}" completely?\n\nThis cannot be undone.',
+    confirmDeleteCustomer:'Remove this customer?',
+    confirmDeleteUser:'Remove this user?',
+    confirmDisconnect:'Disconnect from Google Sheets?\n\nYour data stays safe in the sheet.',
+    notEnoughStock:'Not enough stock for ',
+    errorLoad:'Could not load data.\nCheck your API URL in settings.',
+    alreadyAdded:'Already added',
+    now:'now', adding:'adding', removing:'removing',
+    colourQtys:'Colour Quantities',phonePlaceholder:'(81) 99999-9999',
+    hello:'Hi',
+  },
+  pt:{
+    logout:'Sair', inventory:'Estoque', sales:'Vendas', customers:'Clientes',
+    reports:'Relatórios', users:'Usuários', settings:'Config.',
+    statItems:'Itens', statQty:'Em Estoque', statValue:'Valor',
+    searchPlaceholder:'Buscar itens...', filterAll:'Todos',
+    newItem:'Novo Item', editItem:'Editar Item', addToStock:'Adicionar ao Estoque',
+    saveChanges:'Salvar Alterações', removeItem:'Remover Item',
+    updateStock:'Atualizar Estoque', confirm:'Confirmar',
+    itemDetail:'Detalhes do Item', category:'Categoria', material:'Material',
+    purchasePrice:'Preço de Custo (R$)', salePrice:'Preço de Venda (R$)',
+    weight:'Peso (gramas)', qtyNoColour:'Qtd. (sem cores)',
+    colourVariants:'Variações de Cor', optional:'(opcional)',
+    addCustom:'Adicionar', customPlaceholder:'Cor personalizada...',
+    notes:'Observações', notesPlaceholder:'Marca, tamanho, estado, fornecedor...',
+    photo:'Foto', photoNote:'(salva localmente neste dispositivo)',
+    uploadText:'Toque para tirar foto ou escolher da galeria',
+    newSale:'Nova Venda', addItem:'Adicionar Item', total:'Total',
+    salesChannel:'Canal de Venda *', customer:'Cliente',
+    customerPlaceholder:'Nome do cliente...', phone:'Telefone',
+    email:'E-mail', paymentMethod:'Forma de Pagamento', salesperson:'Vendedor',
+    confirmSale:'Confirmar Venda', noSales:'Nenhuma venda registrada ainda.\nToque + para registrar.',
+    noItems:'Nenhum item encontrado.\nToque + para adicionar.',
+    noCustomers:'Nenhum cliente ainda.\nToque + para adicionar.',
+    allStocked:'Todos os itens bem abastecidos!',
+    newCustomer:'Novo Cliente', editCustomer:'Editar Cliente',
+    saveCustomer:'Salvar Cliente', removeCustomer:'Remover Cliente',
+    fullName:'Nome Completo *', namePlaceholder:'Nome completo',
+    customerNotes:'Observações', customerNotesPlaceholder:'Aniversário, preferências...',
+    newUser:'Novo Usuário', editUser:'Editar Usuário',
+    saveUser:'Salvar Usuário', removeUser:'Remover Usuário',
+    userFullName:'Nome Completo *', username:'Usuário (login) *',
+    usernamePlaceholder:'ex. maria.silva', password:'Senha *',
+    passwordPlaceholder:'Mínimo 6 caracteres', role:'Função',
+    roleSales:'Vendedor(a)', roleAdmin:'Administrador(a)',
+    reportsTitle:'Relatórios', from:'De:', to:'Até:',
+    revenue:'Receita', salesCount:'Vendas', itemsSold:'Itens Vendidos',
+    estimatedProfit:'Lucro Estimado', byChannel:'Por Canal de Venda',
+    topItems:'Itens Mais Vendidos', bySalesperson:'Por Vendedor',
+    currentStock:'Estoque Atual', stockCost:'Custo total do estoque',
+    stockValue:'Valor de venda do estoque', totalItems:'Total de itens diferentes',
+    noData:'Sem dados', dailyReport:'Relatório Diário por E-mail',
+    autoSend:'Envio automático', autoSendSub:'Todos os dias às 22:30 (horário de Recife)',
+    active:'✓ Ativo', sendNow:'Enviar relatório agora', sendNowSub:'Envia o relatório de hoje',
+    send:'Enviar', connection:'Conexão', apiUrl:'URL da API', change:'Alterar',
+    appearance:'Aparência', darkTheme:'Tema escuro', stockLayout:'Layout de estoque',
+    grid:'Grade', list:'Lista', inStock:'Em Estoque', outOfStock:'Sem estoque',
+    qty:'Qtd', showColours:'▸ Ver cores', hideColours:'▾ Ocultar cores',
+    colourStock:'Estoque por Cor', costLabel:'Custo', sellLabel:'Venda',
+    added:'Adicionado', addedTab:'Ent.', removedTab:'Saí.',
+    saving:'Salvando...', itemAdded:'Item adicionado ✓', itemUpdated:'Item atualizado ✓',
+    itemRemoved:'Item removido', stockUpdated:'Estoque atualizado ✓',
+    saleRegistered:'Venda registrada ✓', customerSaved:'Cliente salvo ✓',
+    customerRemoved:'Cliente removido', userSaved:'Usuário salvo ✓', userRemoved:'Usuário removido',
+    reportSent:'Relatório enviado ✓', sendingReport:'Enviando relatório...',
+    nameRequired:'Nome é obrigatório', itemNameRequired:'Nome é obrigatório',
+    addAtLeastOne:'Adicione pelo menos um item', selectChannel:'Selecione o canal de venda',
+    passwordRequired:'Defina uma senha para o novo usuário',
+    usernameRequired:'Nome e usuário são obrigatórios',
+    confirmDeleteItem:'Remover "{name}" completamente?\n\nEsta ação não pode ser desfeita.',
+    confirmDeleteCustomer:'Remover este cliente?',
+    confirmDeleteUser:'Remover este usuário?',
+    confirmDisconnect:'Desconectar do Google Sheets?\n\nSeus dados ficam seguros na planilha.',
+    notEnoughStock:'Estoque insuficiente para ',
+    errorLoad:'Não foi possível carregar os dados.\nVerifique a URL da API.',
+    alreadyAdded:'Já adicionado',
+    now:'agora', adding:'adicionando', removing:'removendo',
+    colourQtys:'Quantidades por Cor', phonePlaceholder:'(81) 99999-9999',
+    hello:'Olá',
+  }
+};
+function t(k){return (T[currentLang]||T['en'])[k]||(T['en'][k])||k;}
+function channels(){return currentLang==='pt'?CHANNELS_PT:CHANNELS_EN;}
 
 // ── STATE ──
 let API_URL = localStorage.getItem('lama_api_url') || '';
-let currentUser = null; // {username, name, role}
+let currentUser = null;
 let allItems=[], allTransactions=[], allSales=[], allCustomers=[], allUsers=[];
 let categories=[];
 let currentTab='inventory';
@@ -633,6 +787,7 @@ let stockUpdateItem=null, stockUpdateDir='in';
 let currentPhotoData='', selectedColours=[], stockColourChanges={};
 let currentTheme = localStorage.getItem('lama_theme')||'light';
 let currentView = localStorage.getItem('lama_view')||'grid';
+let currentLang = localStorage.getItem('lama_lang')||'en';
 
 // ── SALE STATE (shared between admin modal and sales screen) ──
 let saleItems=[]; // [{item_id, name, sale_price, colour, qty}]
@@ -645,6 +800,7 @@ let saleNotes='';
 // ── INIT ──
 window.onload = () => {
   applyTheme();
+  applyLang();
   if(API_URL) {
     showLoginScreen();
   } else {
@@ -805,9 +961,9 @@ function handleFab() {
 function renderInventory() {
   const main=document.getElementById('main-content');
   main.innerHTML=`<div class="toolbar-row">
-    <input class="search-input" id="search-input" placeholder="Buscar itens..." oninput="filterInventory()" />
+    <input class="search-input" id="search-input" placeholder="${t('searchPlaceholder')}" oninput="filterInventory()" />
     <select class="filter-select" id="filter-cat" onchange="filterInventory()">
-      <option value="">Todos</option>${categories.map(c=>`<option>${esc(c)}</option>`).join('')}
+      <option value="">${t('filterAll')}</option>${categories.map(c=>`<option>${esc(c)}</option>`).join('')}
     </select>
   </div>
   <div class="${currentView==='list'?'items-list':'items-grid'}" id="items-grid"></div>`;
@@ -824,7 +980,7 @@ function filterInventory() {
   const grid=document.getElementById('items-grid');
   if(!grid) return;
   if(!items.length){
-    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">💍</div><p>Nenhum item encontrado.<br>Toque + para adicionar.</p></div>`;
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">💍</div><p>${t('noItems')}</p></div>`;
     return;
   }
   grid.innerHTML=items.map(renderItemCard).join('');
@@ -835,7 +991,7 @@ function renderItemCard(item) {
   const qty=v.length?totalVQty(v):Number(item.quantity||0);
   const qc=qty===0?'out':qty<=2?'low':'';
   const cc=qty===0?'out-of-stock':qty<=2?'low-stock':'';
-  const ql=qty===0?'Sem estoque':`Qtd: ${qty}`;
+  const ql=qty===0?t('outOfStock'):`${t('qty')}: ${qty}`;
   const ph=item.photo_url
     ?`<div class="item-photo"><img src="${esc(item.photo_url)}" onerror="this.parentElement.textContent='💍'" /></div>`
     :`<div class="item-photo">💍</div>`;
@@ -850,15 +1006,15 @@ function renderItemCard(item) {
         <div class="item-name">${esc(item.name)}</div>
         <div class="item-meta">${esc(item.category||'')}${item.material?' · '+esc(item.material):''}</div>
         <div class="item-prices">
-          <div class="price-tag"><span>Custo</span><span class="val">R$ ${fp(item.purchase_price)}</span></div>
-          <div class="price-tag"><span>Venda</span><span class="val">R$ ${fp(item.sale_price)}</span></div>
+          <div class="price-tag"><span>${t('costLabel')}</span><span class="val">R$ ${fp(item.purchase_price)}</span></div>
+          <div class="price-tag"><span>${t('sellLabel')}</span><span class="val">R$ ${fp(item.sale_price)}</span></div>
         </div>${dots}</div></div>
-    ${v.length?`<div class="variants-panel" id="vp-${item.item_id}">${vrows}</div><div class="expand-row" onclick="toggleV('${item.item_id}')"><span id="el-${item.item_id}">▸ Ver cores</span></div>`:''}
+    ${v.length?`<div class="variants-panel" id="vp-${item.item_id}">${vrows}</div><div class="expand-row" onclick="toggleV('${item.item_id}')"><span id="el-${item.item_id}">${t('showColours')}</span></div>`:''}
     <div class="item-footer"><span class="qty-badge ${qc}">${ql}</span>
       <div class="item-actions" onclick="event.stopPropagation()">
-        <button class="action-btn btn-in" onclick="openStockUpdate('${item.item_id}','in')">＋ Ent.</button>
-        <button class="action-btn btn-out" onclick="openStockUpdate('${item.item_id}','out')">－ Saí.</button>
-        <button class="action-btn btn-edit" onclick="openEditItem('${item.item_id}')">Editar</button>
+        <button class="action-btn btn-in" onclick="openStockUpdate('${item.item_id}','in')">＋ ${t('addedTab')}</button>
+        <button class="action-btn btn-out" onclick="openStockUpdate('${item.item_id}','out')">－ ${t('removedTab')}</button>
+        <button class="action-btn btn-edit" onclick="openEditItem('${item.item_id}')">${currentLang==='pt'?'Editar':'Edit'}</button>
       </div></div></div>`;
 }
 
@@ -866,7 +1022,7 @@ function toggleV(id){
   const p=document.getElementById('vp-'+id),l=document.getElementById('el-'+id);
   if(!p) return;
   const o=p.classList.toggle('open');
-  l.textContent=o?'▾ Ocultar cores':'▸ Ver cores';
+  l.textContent=o?t('hideColours'):t('showColours');
 }
 
 async function qvu(item_id,name,delta){
@@ -885,7 +1041,7 @@ async function qvu(item_id,name,delta){
 function renderSalesTab() {
   const main = document.getElementById('main-content');
   if(!allSales.length) {
-    main.innerHTML=`<div class="empty-state"><div class="empty-icon">🛍</div><p>Nenhuma venda registrada ainda.<br>Toque + para registrar uma venda.</p></div>`;
+    main.innerHTML=`<div class="empty-state"><div class="empty-icon">🛍</div><p>${t('noSales')}</p></div>`;
     return;
   }
   main.innerHTML='<div>'+allSales.slice(0,100).map(s=>{
@@ -929,62 +1085,61 @@ function renderSaleModalBody() {
           </div>
           <button class="sale-item-remove" onclick="removeSaleItem(${idx})">✕</button>
         </div>`).join('')}</div>`
-    : `<div style="text-align:center;padding:20px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">Nenhum item adicionado ainda</div>`;
+    : `<div style="text-align:center;padding:20px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">${currentLang==='pt'?'Nenhum item adicionado ainda':'No items added yet'}</div>`;
 
   const total = saleItems.reduce((s,i)=>s+(Number(i.sale_price)*i.qty),0);
-  const channelHtml = `<div class="channel-chips">${CHANNELS.map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
+  const channelHtml = `<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
 
   body.innerHTML=`
     <div class="form-group">
-      <label class="form-label">Itens Vendidos</label>
+      <label class="form-label">${currentLang==='pt'?'Itens Vendidos':'Items Sold'}</label>
       ${itemsHtml}
-      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ Adicionar Item</button>
+      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ ${t('addItem')}</button>
     </div>
     <div class="form-group">
-      <label class="form-label">Total: <span style="color:var(--gold);font-weight:600">R$ ${fp(total)}</span></label>
+      <label class="form-label">${t('total')}: <span style="color:var(--gold);font-weight:600">R$ ${fp(total)}</span></label>
     </div>
     <div class="form-group">
-      <label class="form-label">Canal de Venda *</label>
+      <label class="form-label">${t('salesChannel')}</label>
       ${channelHtml}
     </div>
     <div class="form-group">
-      <label class="form-label">Cliente</label>
+      <label class="form-label">${t('customer')}</label>
       <div class="autocomplete-wrap">
-        <input class="form-input" id="sale-customer-input" placeholder="Nome do cliente..." value="${esc(saleCustomerName)}"
+        <input class="form-input" id="sale-customer-input" placeholder="${t('customerPlaceholder')}" value="${esc(saleCustomerName)}"
                oninput="onCustomerInput(this.value)" autocomplete="off" />
         <div class="autocomplete-list" id="customer-autocomplete" style="display:none"></div>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Telefone</label>
-        <input class="form-input" id="sale-customer-phone" placeholder="(81) 99999-9999" value="${esc(saleCustomerPhone)}"
+        <label class="form-label">${t('phone')}</label>
+        <input class="form-input" id="sale-customer-phone" placeholder="${t('phonePlaceholder')}" value="${esc(saleCustomerPhone)}"
                oninput="saleCustomerPhone=this.value" type="tel" />
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
+        <label class="form-label">${t('email')}</label>
         <input class="form-input" id="sale-customer-email" placeholder="email@..." value="${esc(saleCustomerEmail)}"
                oninput="saleCustomerEmail=this.value" type="email" />
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Forma de Pagamento</label>
+      <label class="form-label">${t('paymentMethod')}</label>
       <select class="form-select" id="sale-payment" onchange="salePayment=this.value">
-        <option value="">Selecionar...</option>
-        <option ${salePayment==='Dinheiro'?'selected':''}>Dinheiro</option>
-        <option ${salePayment==='Cartão de Crédito'?'selected':''}>Cartão de Crédito</option>
-        <option ${salePayment==='Cartão de Débito'?'selected':''}>Cartão de Débito</option>
-        <option ${salePayment==='PIX'?'selected':''}>PIX</option>
-        <option ${salePayment==='Transferência'?'selected':''}>Transferência</option>
-        <option ${salePayment==='Outro'?'selected':''}>Outro</option>
+        <option value="">${currentLang==='pt'?'Selecionar...':'Select...'}</option>
+        <option>Cash / Dinheiro</option>
+        <option>Card / Cartão</option>
+        <option>PIX</option>
+        <option>Transfer / Transferência</option>
+        <option>${currentLang==='pt'?'Outro':'Other'}</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Observações</label>
-      <input class="form-input" id="sale-notes" placeholder="Observações adicionais..." value="${esc(saleNotes)}"
+      <label class="form-label">${t('notes')}</label>
+      <input class="form-input" id="sale-notes" placeholder="${t('notesPlaceholder')}" value="${esc(saleNotes)}"
              oninput="saleNotes=this.value" />
     </div>
-    <button class="btn btn-primary" onclick="submitSale('sale-modal')">Confirmar Venda</button>
+    <button class="btn btn-primary" id="confirm-sale-btn-modal" onclick="submitSale('sale-modal')">${t('confirmSale')}</button>
   `;
 }
 
@@ -1122,7 +1277,7 @@ async function submitSale(source) {
   });
   if(btn){btn.disabled=false;btn.textContent='Confirmar Venda';}
   if(res.success){
-    showToast('Venda registrada ✓','success');
+    showToast(t('saleRegistered'),'success');
     saleItems=[];saleChannel='';saleCustomerId='';
     saleCustomerName='';saleCustomerPhone='';saleCustomerEmail='';
     salePayment='';saleNotes='';
@@ -1192,16 +1347,16 @@ async function saveCustomer(){
     notes:document.getElementById('c-notes').value
   };
   const res=await callApi(params);
-  if(res.success){closeModal('customer-modal');showToast('Cliente salvo ✓','success');await refreshAll();}
-  else showToast(res.error||'Erro','error');
+  if(res.success){closeModal('customer-modal');showToast(t('customerSaved'),'success');await refreshAll();}
+  else showToast(res.error||'Error','error');
 }
 
 async function confirmDeleteCustomer(){
   const id=document.getElementById('edit-customer-id').value;
   if(!confirm('Remover este cliente?'))return;
   const res=await callApi({action:'deleteCustomer',customer_id:id});
-  if(res.success){closeModal('customer-modal');showToast('Cliente removido','success');await refreshAll();}
-  else showToast(res.error||'Erro','error');
+  if(res.success){closeModal('customer-modal');showToast(t('customerRemoved'),'success');await refreshAll();}
+  else showToast(res.error||'Error','error');
 }
 
 // ── REPORTS ──
@@ -1248,34 +1403,31 @@ function renderReportData(){
   const totalCost=allItems.reduce((s,i)=>s+Number(i.purchase_price||0)*Number(i.quantity||0),0);
   const totalStockVal=allItems.reduce((s,i)=>s+Number(i.sale_price||0)*Number(i.quantity||0),0);
 
-  const channelRows=Object.entries(byChannel).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">R$ ${fp(v)}</span></div>`).join('');
-  const itemRows=Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">${v} un.</span></div>`).join('');
-  const spRows=Object.entries(bySP).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">R$ ${fp(v)}</span></div>`).join('');
+  const channelRows=Object.entries(byChannel).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">R$ ${fp(v)}</span></div>`).join('')||`<div style="color:var(--muted);font-size:.83rem">${t('noData')}</div>`;
+  const itemRows=Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">${v} un.</span></div>`).join('')||`<div style="color:var(--muted);font-size:.83rem">${t('noData')}</div>`;
+  const spRows=Object.entries(bySP).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="report-row"><span class="report-row-label">${esc(k)}</span><span class="report-row-val">R$ ${fp(v)}</span></div>`).join('')||`<div style="color:var(--muted);font-size:.83rem">${t('noData')}</div>`;
 
   document.getElementById('report-data').innerHTML=`
     <div class="report-kpi-grid">
-      <div class="kpi-card"><div class="kpi-value">R$ ${fp(totalRev)}</div><div class="kpi-label">Receita</div></div>
-      <div class="kpi-card"><div class="kpi-value">${sales.length}</div><div class="kpi-label">Vendas</div></div>
-      <div class="kpi-card"><div class="kpi-value">${totalItems}</div><div class="kpi-label">Itens Vendidos</div></div>
-      <div class="kpi-card"><div class="kpi-value">R$ ${fp(totalRev-totalCost)}</div><div class="kpi-label">Lucro Estimado</div></div>
+      <div class="kpi-card"><div class="kpi-value">R$ ${fp(totalRev)}</div><div class="kpi-label">${t('revenue')}</div></div>
+      <div class="kpi-card"><div class="kpi-value">${sales.length}</div><div class="kpi-label">${t('salesCount')}</div></div>
+      <div class="kpi-card"><div class="kpi-value">${totalItems}</div><div class="kpi-label">${t('itemsSold')}</div></div>
+      <div class="kpi-card"><div class="kpi-value">R$ ${fp(totalRev-totalCost)}</div><div class="kpi-label">${t('estimatedProfit')}</div></div>
     </div>
     <div class="report-section">
-      <div class="report-section-title">Por Canal de Venda</div>
-      ${channelRows||'<div style="color:var(--muted);font-size:.83rem">Sem dados</div>'}
+      <div class="report-section-title">${t('byChannel')}</div>${channelRows}
     </div>
     <div class="report-section">
-      <div class="report-section-title">Itens Mais Vendidos</div>
-      ${itemRows||'<div style="color:var(--muted);font-size:.83rem">Sem dados</div>'}
+      <div class="report-section-title">${t('topItems')}</div>${itemRows}
     </div>
     <div class="report-section">
-      <div class="report-section-title">Por Vendedor</div>
-      ${spRows||'<div style="color:var(--muted);font-size:.83rem">Sem dados</div>'}
+      <div class="report-section-title">${t('bySalesperson')}</div>${spRows}
     </div>
     <div class="report-section">
-      <div class="report-section-title">Estoque Atual</div>
-      <div class="report-row"><span class="report-row-label">Custo total do estoque</span><span class="report-row-val">R$ ${fp(totalCost)}</span></div>
-      <div class="report-row"><span class="report-row-label">Valor de venda do estoque</span><span class="report-row-val">R$ ${fp(totalStockVal)}</span></div>
-      <div class="report-row"><span class="report-row-label">Total de itens diferentes</span><span class="report-row-val">${allItems.length}</span></div>
+      <div class="report-section-title">${t('currentStock')}</div>
+      <div class="report-row"><span class="report-row-label">${t('stockCost')}</span><span class="report-row-val">R$ ${fp(totalCost)}</span></div>
+      <div class="report-row"><span class="report-row-label">${t('stockValue')}</span><span class="report-row-val">R$ ${fp(totalStockVal)}</span></div>
+      <div class="report-row"><span class="report-row-label">${t('totalItems')}</span><span class="report-row-val">${allItems.length}</span></div>
     </div>
   `;
 }
@@ -1336,16 +1488,16 @@ async function saveUser(){
   const params={action:id?'updateUser':'addUser',user_id:id,name,username,role};
   if(password)params.password=password;
   const res=await callApi(params);
-  if(res.success){closeModal('user-modal');showToast('Usuário salvo ✓','success');renderUsersTab();}
-  else showToast(res.error||'Erro','error');
+  if(res.success){closeModal('user-modal');showToast(t('userSaved'),'success');renderUsersTab();}
+  else showToast(res.error||'Error','error');
 }
 
 async function confirmDeleteUser(){
   const id=document.getElementById('edit-user-id').value;
-  if(!confirm('Remover este usuário?'))return;
+  if(!confirm(t('confirmDeleteUser')))return;
   const res=await callApi({action:'deleteUser',user_id:id});
-  if(res.success){closeModal('user-modal');showToast('Usuário removido','success');renderUsersTab();}
-  else showToast(res.error||'Erro','error');
+  if(res.success){closeModal('user-modal');showToast(t('userRemoved'),'success');renderUsersTab();}
+  else showToast(res.error||'Error','error');
 }
 
 // ── SETTINGS ──
@@ -1353,53 +1505,53 @@ function renderSettings(){
   const main=document.getElementById('main-content');
   main.innerHTML=`
     <div class="settings-section">
-      <div class="section-title">Relatório Diário por E-mail</div>
+      <div class="section-title">${t('dailyReport')}</div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">Envio automático</div>
-          <div class="settings-sublabel">Todos os dias às 22:30 (horário de Recife)</div>
+          <div class="settings-label">${t('autoSend')}</div>
+          <div class="settings-sublabel">${t('autoSendSub')}</div>
         </div>
-        <span style="font-size:.75rem;color:var(--success)">✓ Ativo</span>
+        <span style="font-size:.75rem;color:var(--success)">${t('active')}</span>
       </div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">Enviar relatório agora</div>
-          <div class="settings-sublabel">Envia o relatório do dia de hoje</div>
+          <div class="settings-label">${t('sendNow')}</div>
+          <div class="settings-sublabel">${t('sendNowSub')}</div>
         </div>
-        <button class="action-btn btn-in" onclick="sendReportNow()">Enviar</button>
+        <button class="action-btn btn-in" onclick="sendReportNow()">${t('send')}</button>
       </div>
     </div>
     <div class="settings-section">
-      <div class="section-title">Conexão</div>
+      <div class="section-title">${t('connection')}</div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">URL da API</div>
+          <div class="settings-label">${t('apiUrl')}</div>
           <div class="settings-sublabel" style="word-break:break-all;max-width:220px">${esc(API_URL)}</div>
         </div>
-        <button class="action-btn btn-edit" onclick="promptChangeUrl()">Alterar</button>
+        <button class="action-btn btn-edit" onclick="promptChangeUrl()">${t('change')}</button>
       </div>
     </div>
     <div class="settings-section">
-      <div class="section-title">Aparência</div>
+      <div class="section-title">${t('appearance')}</div>
       <div class="settings-row">
-        <div class="settings-label">Tema escuro</div>
+        <div class="settings-label">${t('darkTheme')}</div>
         <button class="icon-btn" onclick="toggleDark()" id="dark-btn-settings">${currentTheme==='dark'?'☀️':'🌙'}</button>
       </div>
       <div class="settings-row">
-        <div class="settings-label">Layout de estoque</div>
+        <div class="settings-label">${t('stockLayout')}</div>
         <div style="display:flex;gap:6px">
-          <button class="action-btn ${currentView==='grid'?'btn-in':'btn-edit'}" onclick="setView('grid')">Grade</button>
-          <button class="action-btn ${currentView==='list'?'btn-in':'btn-edit'}" onclick="setView('list')">Lista</button>
+          <button class="action-btn ${currentView==='grid'?'btn-in':'btn-edit'}" onclick="setView('grid')">${t('grid')}</button>
+          <button class="action-btn ${currentView==='list'?'btn-in':'btn-edit'}" onclick="setView('list')">${t('list')}</button>
         </div>
       </div>
     </div>`;
 }
 
 async function sendReportNow(){
-  showToast('Enviando relatório...','');
+  showToast(t('sendingReport'),'');
   const res=await callApi({action:'sendDailyReport'});
-  if(res.success)showToast('Relatório enviado ✓','success');
-  else showToast(res.error||'Erro ao enviar','error');
+  if(res.success)showToast(t('reportSent'),'success');
+  else showToast(res.error||'Error','error');
 }
 
 function promptChangeUrl(){
@@ -1441,53 +1593,56 @@ function renderSaleForm(){
     :`<div style="text-align:center;padding:24px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">Nenhum item adicionado</div>`;
 
   const total=saleItems.reduce((s,i)=>s+(Number(i.sale_price)*i.qty),0);
-  const channelHtml=`<div class="channel-chips">${CHANNELS.map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
+  const channelHtml=`<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
 
   body.innerHTML=`
     <div class="form-group">
-      <div class="sale-step-label">Olá, ${esc(currentUser?.name||'Vendedor(a)')} 👋</div>
+      <div class="sale-step-label">${t('hello')}, ${esc(currentUser?.name||'Vendedor(a)')} 👋</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Itens da venda</label>
+      <label class="form-label">${currentLang==='pt'?'Itens da venda':'Sale items'}</label>
       ${itemsHtml}
-      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ Adicionar Item</button>
+      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ ${t('addItem')}</button>
     </div>
-    ${saleItems.length?`<div class="form-group"><label class="form-label">Total: <span style="color:var(--gold);font-weight:600;font-size:1rem">R$ ${fp(total)}</span></label></div>`:''}
+    ${saleItems.length?`<div class="form-group"><label class="form-label">${t('total')}: <span style="color:var(--gold);font-weight:600;font-size:1rem">R$ ${fp(total)}</span></label></div>`:''}
     <div class="form-group">
-      <label class="form-label">Canal de Venda *</label>
+      <label class="form-label">${t('salesChannel')}</label>
       ${channelHtml}
     </div>
     <div class="form-group">
-      <label class="form-label">Cliente</label>
+      <label class="form-label">${t('customer')}</label>
       <div class="autocomplete-wrap">
-        <input class="form-input" id="sp-customer-input" placeholder="Nome do cliente..." value="${esc(saleCustomerName)}"
+        <input class="form-input" id="sp-customer-input" placeholder="${t('customerPlaceholder')}" value="${esc(saleCustomerName)}"
                oninput="onCustomerInputSP(this.value)" autocomplete="off" />
         <div class="autocomplete-list" id="sp-customer-autocomplete" style="display:none"></div>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Telefone</label>
-        <input class="form-input" id="sp-customer-phone" placeholder="(81) 99999-9999" value="${esc(saleCustomerPhone)}" type="tel" />
+        <label class="form-label">${t('phone')}</label>
+        <input class="form-input" id="sp-customer-phone" placeholder="${t('phonePlaceholder')}" value="${esc(saleCustomerPhone)}" type="tel" />
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
+        <label class="form-label">${t('email')}</label>
         <input class="form-input" id="sp-customer-email" placeholder="email@..." value="${esc(saleCustomerEmail)}" type="email" />
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Forma de Pagamento</label>
+      <label class="form-label">${t('paymentMethod')}</label>
       <select class="form-select" id="sp-payment">
-        <option value="">Selecionar...</option>
-        <option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option>
-        <option>PIX</option><option>Transferência</option><option>Outro</option>
+        <option value="">${currentLang==='pt'?'Selecionar...':'Select...'}</option>
+        <option>Cash / Dinheiro</option>
+        <option>Card / Cartão</option>
+        <option>PIX</option>
+        <option>Transfer / Transferência</option>
+        <option>${currentLang==='pt'?'Outro':'Other'}</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Observações</label>
-      <input class="form-input" id="sp-notes" placeholder="Observações adicionais..." value="${esc(saleNotes)}" />
+      <label class="form-label">${t('notes')}</label>
+      <input class="form-input" id="sp-notes" placeholder="${t('notesPlaceholder')}" value="${esc(saleNotes)}" />
     </div>
-    <button class="btn btn-primary" id="confirm-sale-btn-sp" onclick="submitSale('sp')">✓ Confirmar Venda</button>
+    <button class="btn btn-primary" id="confirm-sale-btn-sp" onclick="submitSale('sp')">✓ ${t('confirmSale')}</button>
   `;
 }
 
@@ -1580,11 +1735,11 @@ async function saveItem(){
     const savedId=editId||res.item_id;
     if(currentPhotoData)savePhotoLocal(savedId,currentPhotoData);
     closeModal('item-modal');
-    showToast(editId?'Item atualizado ✓':'Item adicionado ✓','success');
+    showToast(editId?t('itemUpdated'):t('itemAdded'),'success');
     await refreshAll();
   } else {
-    btn.textContent=editId?'Salvar Alterações':'Adicionar ao Estoque';
-    showToast(res.error||'Erro','error');
+    btn.textContent=editId?t('saveChanges'):t('addToStock');
+    showToast(res.error||'Error','error');
   }
 }
 
@@ -1593,8 +1748,8 @@ async function confirmDelete(){
   const item=allItems.find(i=>i.item_id===id);
   if(!confirm(`Remover "${item?.name||'item'}" completamente? Esta ação não pode ser desfeita.`))return;
   const res=await callApi({action:'deleteItem',item_id:id});
-  if(res.success){deletePhotoLocal(id);closeModal('item-modal');showToast('Item removido','success');await refreshAll();}
-  else showToast(res.error||'Erro','error');
+  if(res.success){deletePhotoLocal(id);closeModal('item-modal');showToast(t('itemRemoved'),'success');await refreshAll();}
+  else showToast(res.error||'Error','error');
 }
 
 // ── STOCK UPDATE ──
@@ -1660,8 +1815,8 @@ async function submitStockUpdate(){
           payment_type:document.getElementById('s-payment-type').value,
           notes:`${x.name}: ${stockUpdateDir==='in'?'+':'−'}${d} | ${document.getElementById('s-notes').value}`});
       }
-      closeModal('stock-modal');showToast('Estoque atualizado ✓','success');await refreshAll();
-    } else showToast(res.error||'Erro','error');
+      closeModal('stock-modal');showToast(t('stockUpdated'),'success');await refreshAll();
+    } else showToast(res.error||'Error','error');
   } else {
     const qty=parseInt(document.getElementById('s-quantity')?.value)||1;
     const res=await callApi({action:'updateStock',item_id:stockUpdateItem.item_id,
@@ -1745,6 +1900,54 @@ function savePhotoLocal(id,data){try{localStorage.setItem('ph_'+id,data);}catch(
 function getPhotoLocal(id){try{return localStorage.getItem('ph_'+id)||'';}catch(e){return '';}}
 function deletePhotoLocal(id){try{localStorage.removeItem('ph_'+id);}catch(e){}}
 
+// ── LANGUAGE ──
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lama_lang', lang);
+  applyLang();
+  renderTab();
+}
+function applyLang() {
+  document.documentElement.lang = currentLang==='pt'?'pt-BR':'en';
+  document.getElementById('lang-en')?.classList.toggle('active', currentLang==='en');
+  document.getElementById('lang-pt')?.classList.toggle('active', currentLang==='pt');
+  applyTranslations();
+}
+function applyTranslations() {
+  // Login
+  const lb = document.getElementById('login-submit-btn'); if(lb) lb.textContent = currentLang==='pt'?'Entrar':'Sign in';
+  // Header
+  const lo = document.getElementById('logout-btn-main'); if(lo) lo.textContent = t('logout');
+  // Stats
+  const sli = document.getElementById('stat-label-items'); if(sli) sli.textContent = t('statItems');
+  const slq = document.getElementById('stat-label-qty');   if(slq) slq.textContent = t('statQty');
+  const slv = document.getElementById('stat-label-value'); if(slv) slv.textContent = t('statValue');
+  // Tabs
+  const tabs = {
+    inventory: 'inventory', sales: 'sales', customers: 'customers',
+    reports: 'reports', users: 'users', settings: 'settings'
+  };
+  Object.entries(tabs).forEach(([tab, key]) => {
+    const el = document.querySelector(`.tab[data-tab="${tab}"]`);
+    if(el) el.textContent = t(key);
+  });
+  // Form labels in item modal
+  const map = [
+    ['lbl-photo','photo'],['lbl-category','category'],['lbl-material','material'],
+    ['lbl-purchase','purchasePrice'],['lbl-sale','salePrice'],['lbl-weight','weight'],
+    ['lbl-qty-nocolour','qtyNoColour'],['lbl-notes','notes'],
+  ];
+  map.forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.textContent=t(key); });
+  const upt = document.getElementById('upload-text-lbl'); if(upt) upt.textContent = t('uploadText');
+  const cc = document.getElementById('custom-colour-input'); if(cc) cc.placeholder = t('customPlaceholder');
+  const acb = document.getElementById('add-custom-btn'); if(acb) acb.textContent = t('addCustom');
+  const fd = document.getElementById('f-description'); if(fd) fd.placeholder = t('notesPlaceholder');
+  // Sale screen header title
+  const sht = document.querySelector('.sale-header-title'); if(sht) sht.textContent = t('newSale');
+  const slo = document.querySelector('#sale-screen .logout-btn'); if(slo) slo.textContent = t('logout');
+}
+
+// ── THEME ──
 function toggleDark(){
   currentTheme=currentTheme==='dark'?'light':'dark';
   localStorage.setItem('lama_theme',currentTheme);
