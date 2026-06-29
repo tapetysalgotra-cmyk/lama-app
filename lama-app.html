@@ -931,11 +931,11 @@ function updateStats() {
   const total = allItems.length;
   const qty = allItems.reduce((s,i)=>{
     const v=parseVariants(i.notes);
-    return s+(v.length?totalVQty(v):Number(i.quantity||0));
+    return s+(v.length?totalVQty(v):Math.round(Number(i.quantity||0)));
   },0);
-  const val = allItems.reduce((s,i)=>s+(Number(i.sale_price||0)*Number(i.quantity||0)),0);
+  const val = allItems.reduce((s,i)=>s+(Number(i.sale_price||0)*Math.round(Number(i.quantity||0))),0);
   document.getElementById('stat-items').textContent=total;
-  document.getElementById('stat-qty').textContent=qty;
+  document.getElementById('stat-qty').textContent=Math.round(qty);
   document.getElementById('stat-value').textContent='R$ '+fp(val);
 }
 
@@ -995,7 +995,7 @@ function filterInventory() {
 
 function renderItemCard(item) {
   const v=parseVariants(item.notes);
-  const qty=v.length?totalVQty(v):Number(item.quantity||0);
+  const qty=v.length?totalVQty(v):Math.round(Number(item.quantity||0));
   const qc=qty===0?'out':qty<=2?'low':'';
   const cc=qty===0?'out-of-stock':qty<=2?'low-stock':'';
   const ql=qty===0?t('outOfStock'):`${t('qty')}: ${qty}`;
@@ -1004,7 +1004,7 @@ function renderItemCard(item) {
     :`<div class="item-photo">💍</div>`;
   const dots=v.length?`<div class="colour-dots">${v.map(x=>`<span class="colour-dot ${x.qty==0?'out-variant':''}"><span class="dot" style="background:${esc(x.hex||getHex(x.name))}"></span>${esc(x.name)} (${x.qty})</span>`).join('')}</div>`:'';
   const vrows=v.map(x=>{
-    const vq=Number(x.qty||0),vc=vq===0?'out':vq<=2?'low':'';
+    const vq=Math.round(Number(x.qty||0)),vc=vq===0?'out':vq<=2?'low':'';
     return`<div class="variant-row"><div class="variant-colour-info"><div class="variant-dot" style="background:${esc(x.hex||getHex(x.name))}"></div><span class="variant-name">${esc(x.name)}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="variant-qty-num ${vc}">${vq}</span><div class="variant-btns"><button class="v-btn v-btn-in" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',1)">+</button><button class="v-btn v-btn-out" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',-1)">−</button></div></div></div>`;
   }).join('');
   return`<div class="item-card ${cc}" id="card-${item.item_id}">
@@ -1204,7 +1204,7 @@ function openItemPicker() {
 function renderItemPicker() {
   const q=(document.getElementById('item-picker-search')?.value||'').toLowerCase();
   const available=allItems.filter(i=>{
-    const qty=parseVariants(i.notes).length?totalVQty(parseVariants(i.notes)):Number(i.quantity||0);
+    const qty=parseVariants(i.notes).length?totalVQty(parseVariants(i.notes)):Math.round(Number(i.quantity||0));
     return qty>0&&(!q||i.name?.toLowerCase().includes(q));
   });
   const list=document.getElementById('item-picker-list');
@@ -1874,8 +1874,8 @@ function openDetail(id){
   const item=allItems.find(i=>i.item_id===id);if(!item)return;
   const v=parseVariants(item.notes),cn=stripVariants(item.notes);
   const ph=item.photo_url?`<div class="detail-photo"><img src="${esc(item.photo_url)}" /></div>`:`<div class="detail-photo">💍</div>`;
-  const vh=v.length?`<div style="margin-bottom:16px"><div class="form-label" style="margin-bottom:8px">Estoque por Cor</div>${v.map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:14px;height:14px;border-radius:50%;background:${esc(x.hex||getHex(x.name))};border:1px solid rgba(0,0,0,.15)"></div><span style="flex:1;font-size:.85rem;font-weight:500">${esc(x.name)}</span><span style="font-size:.85rem;font-weight:600;color:var(--gold)">${x.qty} em estoque</span></div>`).join('')}</div>`:'';
-  const fields=[['Categoria',item.category],['Material',item.material],['Peso',item.weight_grams?item.weight_grams+'g':'—'],['Qtd. Total',v.length?totalVQty(v):item.quantity],['Custo',item.purchase_price?'R$ '+fp(item.purchase_price):'—'],['Venda',item.sale_price?'R$ '+fp(item.sale_price):'—'],['Adicionado',item.date_added?new Date(item.date_added).toLocaleDateString('pt-BR'):'—']];
+  const vh=v.length?`<div style="margin-bottom:16px"><div class="form-label" style="margin-bottom:8px">Estoque por Cor</div>${v.map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:14px;height:14px;border-radius:50%;background:${esc(x.hex||getHex(x.name))};border:1px solid rgba(0,0,0,.15)"></div><span style="flex:1;font-size:.85rem;font-weight:500">${esc(x.name)}</span><span style="font-size:.85rem;font-weight:600;color:var(--gold)">${Math.round(Number(x.qty||0))} ${currentLang==='pt'?'em estoque':'in stock'}</span></div>`).join('')}</div>`:'';
+  const fields=[['Categoria',item.category],['Material',item.material],['Peso',item.weight_grams?item.weight_grams+'g':'—'],['Qtd. Total',v.length?totalVQty(v):Math.round(Number(item.quantity||0))],['Custo',item.purchase_price?'R$ '+fp(item.purchase_price):'—'],['Venda',item.sale_price?'R$ '+fp(item.sale_price):'—'],['Adicionado',item.date_added?new Date(item.date_added).toLocaleDateString('pt-BR'):'—']];
   document.getElementById('detail-body').innerHTML=`${ph}<h2 style="font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:12px">${esc(item.name)}</h2>${cn?`<p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;line-height:1.6">${esc(cn)}</p>`:''}${vh}<div class="detail-grid">${fields.map(([l,x])=>`<div class="detail-field"><div class="detail-field-label">${l}</div><div class="detail-field-value">${esc(String(x||'—'))}</div></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary" style="flex:1" onclick="closeModal('detail-modal');openStockUpdate('${id}','in')">＋ Entrada</button><button class="btn btn-danger-full" style="flex:1" onclick="closeModal('detail-modal');openStockUpdate('${id}','out')">－ Saída</button></div><button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('detail-modal');openEditItem('${id}')">Editar Item</button>`;
   openModal('detail-modal');
 }
@@ -1932,7 +1932,7 @@ function parseVariants(notes){
 function serializeVariants(v){return`__v__:${JSON.stringify(v)}`;}
 function stripVariants(notes){return String(notes||'').replace(/__v__:\[.*?\]/,'').trim();}
 function getHex(name){const p=PRESET_COLOURS.find(c=>c.name.toLowerCase()===name.toLowerCase());return p?p.hex:'#888888';}
-function totalVQty(v){return v.reduce((s,x)=>s+(Number(x.qty)||0),0);}
+function totalVQty(v){return Math.round(v.reduce((s,x)=>s+(Number(x.qty)||0),0));}
 function fp(v){const n=Number(v);return isNaN(n)?'0,00':n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
