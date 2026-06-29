@@ -40,23 +40,23 @@ body{font-family:var(--font);background:var(--ink);color:var(--text);min-height:
 
 /* ── APP SHELL ── */
 #app{display:none;flex-direction:column;min-height:100vh;}
-header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.header-left{display:flex;align-items:center;gap:10px;}
-.header-logo img{height:22px;object-fit:contain;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:8px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:6px;}
+.header-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:1;}
+.header-logo img{height:20px;object-fit:contain;max-width:90px;}
 .header-logo-text{font-size:.62rem;font-weight:600;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;}
-.role-badge{padding:3px 10px;border-radius:20px;font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.role-badge{padding:3px 8px;border-radius:20px;font-size:.58rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
 .role-admin{background:rgba(154,122,74,.12);color:var(--gold);border:1px solid rgba(154,122,74,.25);}
 .role-sales{background:rgba(46,158,106,.12);color:var(--success);border:1px solid rgba(46,158,106,.25);}
-.header-actions{display:flex;align-items:center;gap:6px;}
-.icon-btn{width:34px;height:34px;background:var(--surface);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text);flex-shrink:0;}
+.header-actions{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.icon-btn{width:32px;height:32px;background:var(--surface);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;color:var(--text);flex-shrink:0;}
 .icon-btn:active{opacity:.7;}
-.logout-btn{padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:.68rem;font-weight:500;cursor:pointer;letter-spacing:.03em;}
+.logout-btn{padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:.65rem;font-weight:500;cursor:pointer;letter-spacing:.03em;white-space:nowrap;}
 .logout-btn:active{opacity:.7;}
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle{display:flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface);flex-shrink:0;}
-.lang-btn{display:flex;align-items:center;gap:3px;padding:5px 8px;font-size:.62rem;font-weight:600;cursor:pointer;color:var(--muted);letter-spacing:.04em;transition:background .15s,color .15s;white-space:nowrap;}
+.lang-btn{display:flex;align-items:center;gap:2px;padding:4px 7px;font-size:.6rem;font-weight:600;cursor:pointer;color:var(--muted);letter-spacing:.03em;transition:background .15s,color .15s;white-space:nowrap;}
 .lang-btn.active{background:var(--gold);color:#fff;}
-.lang-btn .flag{font-size:.85rem;line-height:1;}
+.lang-btn .flag{font-size:.8rem;line-height:1;}
 
 /* ── STATS BAR ── */
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
@@ -393,7 +393,14 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
     <img src="https://static.wixstatic.com/media/31bd44_71bcb9a967f8490bbc3e0ed6d4864785~mv2.png/v1/fill/w_306,h_80,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20lama%20design%20HORIZONTAL_edited_edited.png"
          alt="LAMA" style="height:20px;object-fit:contain" onerror="this.outerHTML='<span style=font-weight:700;letter-spacing:.12em;color:var(--gold)>LAMA</span>'" />
     <span class="sale-header-title">Nova Venda</span>
-    <button class="logout-btn" onclick="doLogout()">Sair</button>
+    <div style="display:flex;align-items:center;gap:5px">
+      <div class="lang-toggle">
+        <div class="lang-btn active" id="sp-lang-en" onclick="setLang('en')"><span class="flag">🇬🇧</span> EN</div>
+        <div class="lang-btn" id="sp-lang-pt" onclick="setLang('pt')"><span class="flag">🇧🇷</span> PT</div>
+      </div>
+      <div class="icon-btn" onclick="toggleDark()" id="sp-dark-btn">🌙</div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
   </div>
   <div class="sale-body" id="sale-body">
     <!-- Rendered by renderSaleForm() -->
@@ -1069,35 +1076,61 @@ function openSaleModal() {
   openModal('sale-modal');
 }
 
+function renderSaleBasket(containerId, totalId) {
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  if(!saleItems.length) {
+    container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">${currentLang==='pt'?'Nenhum item adicionado ainda':'No items added yet'}</div>`;
+  } else {
+    container.innerHTML=`<div class="sale-items-list">${saleItems.map((si,idx)=>
+      `<div class="sale-item-row">
+        <div style="flex:1">
+          <div class="sale-item-name">${esc(si.name)}${si.colour?' <span style="color:var(--muted);font-size:.72rem">('+esc(si.colour)+')</span>':''}</div>
+          <div style="font-size:.72rem;color:var(--gold)">R$ ${fp(si.sale_price)}</div>
+        </div>
+        <div class="sale-item-qty-ctrl">
+          <button class="sale-item-qty-btn btn-out" data-idx="${idx}" data-delta="-1">−</button>
+          <span class="sale-item-qty-num">${si.qty}</span>
+          <button class="sale-item-qty-btn btn-in" data-idx="${idx}" data-delta="1">+</button>
+        </div>
+        <button class="sale-item-remove" data-remove="${idx}">✕</button>
+      </div>`).join('')}</div>`;
+  }
+  container.onclick = (e) => {
+    const btn = e.target.closest('[data-delta]');
+    const rem = e.target.closest('[data-remove]');
+    if(btn) {
+      const idx = parseInt(btn.dataset.idx);
+      const delta = parseInt(btn.dataset.delta);
+      if(saleItems[idx]) { saleItems[idx].qty = Math.max(1, saleItems[idx].qty + delta); }
+      renderSaleBasket(containerId, totalId);
+    } else if(rem) {
+      saleItems.splice(parseInt(rem.dataset.remove), 1);
+      renderSaleBasket(containerId, totalId);
+    }
+  };
+  updateSaleTotal(totalId);
+}
+
+function updateSaleTotal(totalId) {
+  const el = document.getElementById(totalId);
+  if(!el) return;
+  const total = saleItems.reduce((s,i)=>s+(Number(i.sale_price)*i.qty),0);
+  el.textContent = t('total')+': R$ '+fp(total);
+}
+
 function renderSaleModalBody() {
   const body = document.getElementById('sale-modal-body');
-  const itemsHtml = saleItems.length
-    ? `<div class="sale-items-list">${saleItems.map((si,idx)=>
-        `<div class="sale-item-row">
-          <div style="flex:1">
-            <div class="sale-item-name">${esc(si.name)}${si.colour?` <span style="color:var(--muted);font-size:.72rem">(${esc(si.colour)})</span>`:''}</div>
-            <div style="font-size:.72rem;color:var(--gold)">R$ ${fp(si.sale_price)}</div>
-          </div>
-          <div class="sale-item-qty-ctrl">
-            <button class="sale-item-qty-btn btn-out" onclick="changeSaleItemQty(${idx},-1)">−</button>
-            <span class="sale-item-qty-num">${si.qty}</span>
-            <button class="sale-item-qty-btn btn-in" onclick="changeSaleItemQty(${idx},1)">+</button>
-          </div>
-          <button class="sale-item-remove" onclick="removeSaleItem(${idx})">✕</button>
-        </div>`).join('')}</div>`
-    : `<div style="text-align:center;padding:20px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">${currentLang==='pt'?'Nenhum item adicionado ainda':'No items added yet'}</div>`;
-
+  const channelHtml = `<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" data-ch="${esc(c)}" onclick="selectSaleChannel(this.dataset.ch)">${c}</div>`).join('')}</div>`;
   const total = saleItems.reduce((s,i)=>s+(Number(i.sale_price)*i.qty),0);
-  const channelHtml = `<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
-
   body.innerHTML=`
     <div class="form-group">
       <label class="form-label">${currentLang==='pt'?'Itens Vendidos':'Items Sold'}</label>
-      ${itemsHtml}
-      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ ${t('addItem')}</button>
+      <div id="sale-basket-modal"></div>
+      <button class="add-sale-item-btn" onclick="openItemPicker()">+ ${t('addItem')}</button>
     </div>
     <div class="form-group">
-      <label class="form-label">${t('total')}: <span style="color:var(--gold);font-weight:600">R$ ${fp(total)}</span></label>
+      <label class="form-label" id="sale-total-modal">${t('total')}: R$ ${fp(total)}</label>
     </div>
     <div class="form-group">
       <label class="form-label">${t('salesChannel')}</label>
@@ -1127,10 +1160,8 @@ function renderSaleModalBody() {
       <label class="form-label">${t('paymentMethod')}</label>
       <select class="form-select" id="sale-payment" onchange="salePayment=this.value">
         <option value="">${currentLang==='pt'?'Selecionar...':'Select...'}</option>
-        <option>Cash / Dinheiro</option>
-        <option>Card / Cartão</option>
-        <option>PIX</option>
-        <option>Transfer / Transferência</option>
+        <option>Cash / Dinheiro</option><option>Card / Cartao</option>
+        <option>PIX</option><option>Transfer / Transferencia</option>
         <option>${currentLang==='pt'?'Outro':'Other'}</option>
       </select>
     </div>
@@ -1141,21 +1172,26 @@ function renderSaleModalBody() {
     </div>
     <button class="btn btn-primary" id="confirm-sale-btn-modal" onclick="submitSale('sale-modal')">${t('confirmSale')}</button>
   `;
+  renderSaleBasket('sale-basket-modal','sale-total-modal');
 }
 
 function selectSaleChannel(ch) {
-  saleChannel=ch;
-  renderSaleModalBody();
+  saleChannel = ch;
+  document.querySelectorAll('.channel-chip').forEach(el => {
+    el.classList.toggle('selected', el.dataset.ch === ch);
+  });
 }
 
 function changeSaleItemQty(idx,delta) {
-  saleItems[idx].qty = Math.max(1, saleItems[idx].qty+delta);
-  renderSaleModalBody();
+  if(saleItems[idx]) saleItems[idx].qty = Math.max(1, saleItems[idx].qty+delta);
+  renderSaleBasket('sale-basket-modal','sale-total-modal');
+  renderSaleBasket('sale-basket-sp','sale-total-sp');
 }
 
 function removeSaleItem(idx) {
   saleItems.splice(idx,1);
-  renderSaleModalBody();
+  renderSaleBasket('sale-basket-modal','sale-total-modal');
+  renderSaleBasket('sale-basket-sp','sale-total-sp');
 }
 
 // ── ITEM PICKER ──
@@ -1172,42 +1208,62 @@ function renderItemPicker() {
     return qty>0&&(!q||i.name?.toLowerCase().includes(q));
   });
   const list=document.getElementById('item-picker-list');
-  if(!available.length){list.innerHTML='<div class="empty-state" style="padding:30px"><p>Nenhum item disponível</p></div>';return;}
-  list.innerHTML=available.map(item=>{
+  if(!available.length){list.innerHTML=`<div class="empty-state" style="padding:30px"><p>${currentLang==='pt'?'Nenhum item disponível':'No items available'}</p></div>`;return;}
+
+  // Store items in a lookup so onclick can use index (avoids quote-escaping issues)
+  list._pickerItems = [];
+  let html = '';
+  available.forEach(item=>{
     const v=parseVariants(item.notes);
     if(v.length) {
-      return v.filter(x=>x.qty>0).map(x=>`
-        <div class="item-card" style="margin-bottom:8px;cursor:pointer" onclick="addItemToSale('${item.item_id}','${esc(item.name)}',${item.sale_price||0},'${esc(x.name)}')">
-          <div class="item-card-inner">
+      v.filter(x=>x.qty>0).forEach(x=>{
+        const idx = list._pickerItems.length;
+        list._pickerItems.push({item_id:item.item_id, name:item.name, sale_price:item.sale_price||0, colour:x.name});
+        html+=`<div class="item-card" style="margin-bottom:8px;cursor:pointer" data-pick="${idx}">
+          <div class="item-card-inner" style="pointer-events:none">
             <div class="item-photo" style="width:56px;min-height:56px;font-size:1.4rem">💍</div>
             <div class="item-info">
               <div class="item-name">${esc(item.name)}</div>
-              <div class="item-meta"><span class="colour-dot" style="display:inline-flex"><span class="dot" style="background:${esc(x.hex||getHex(x.name))}"></span>${esc(x.name)} · Qtd: ${x.qty}</span></div>
+              <div class="item-meta"><span class="colour-dot" style="display:inline-flex"><span class="dot" style="background:${esc(x.hex||getHex(x.name))}"></span>${esc(x.name)} · ${currentLang==='pt'?'Qtd':'Qty'}: ${x.qty}</span></div>
               <div style="font-size:.72rem;color:var(--gold);margin-top:4px">R$ ${fp(item.sale_price)}</div>
             </div>
           </div>
-        </div>`).join('');
-    }
-    return`<div class="item-card" style="margin-bottom:8px;cursor:pointer" onclick="addItemToSale('${item.item_id}','${esc(item.name)}',${item.sale_price||0},'')">
-      <div class="item-card-inner">
-        <div class="item-photo" style="width:56px;min-height:56px;font-size:1.4rem">💍</div>
-        <div class="item-info">
-          <div class="item-name">${esc(item.name)}</div>
-          <div class="item-meta">${esc(item.category||'')} · Qtd: ${item.quantity||0}</div>
-          <div style="font-size:.72rem;color:var(--gold);margin-top:4px">R$ ${fp(item.sale_price)}</div>
+        </div>`;
+      });
+    } else {
+      const idx = list._pickerItems.length;
+      list._pickerItems.push({item_id:item.item_id, name:item.name, sale_price:item.sale_price||0, colour:''});
+      html+=`<div class="item-card" style="margin-bottom:8px;cursor:pointer" data-pick="${idx}">
+        <div class="item-card-inner" style="pointer-events:none">
+          <div class="item-photo" style="width:56px;min-height:56px;font-size:1.4rem">💍</div>
+          <div class="item-info">
+            <div class="item-name">${esc(item.name)}</div>
+            <div class="item-meta">${esc(item.category||'')} · ${currentLang==='pt'?'Qtd':'Qty'}: ${item.quantity||0}</div>
+            <div style="font-size:.72rem;color:var(--gold);margin-top:4px">R$ ${fp(item.sale_price)}</div>
+          </div>
         </div>
-      </div>
-    </div>`;
-  }).join('');
+      </div>`;
+    }
+  });
+  list.innerHTML = html;
+
+  // Single delegated click handler — no inline JS, no escaping issues
+  list.onclick = (e) => {
+    const card = e.target.closest('[data-pick]');
+    if(!card) return;
+    const pick = list._pickerItems[parseInt(card.dataset.pick)];
+    if(!pick) return;
+    addItemToSale(pick.item_id, pick.name, pick.sale_price, pick.colour);
+  };
 }
 
-function addItemToSale(item_id,name,price,colour) {
+function addItemToSale(item_id, name, price, colour) {
   const existing=saleItems.find(i=>i.item_id===item_id&&i.colour===colour);
   if(existing) existing.qty++;
-  else saleItems.push({item_id,name,sale_price:price,colour,qty:1});
+  else saleItems.push({item_id, name, sale_price:price, colour, qty:1});
   closeModal('item-picker-modal');
-  if(document.getElementById('sale-modal').classList.contains('open')) renderSaleModalBody();
-  if(document.getElementById('sale-screen').style.display==='flex') renderSaleForm();
+  renderSaleBasket('sale-basket-modal','sale-total-modal');
+  renderSaleBasket('sale-basket-sp','sale-total-sp');
 }
 
 // ── CUSTOMER AUTOCOMPLETE ──
@@ -1576,35 +1632,20 @@ function showSaleScreen(){
 
 function renderSaleForm(){
   const body=document.getElementById('sale-body');
-  const itemsHtml=saleItems.length
-    ?`<div class="sale-items-list">${saleItems.map((si,idx)=>`
-      <div class="sale-item-row">
-        <div style="flex:1">
-          <div class="sale-item-name">${esc(si.name)}${si.colour?` <span style="color:var(--muted);font-size:.72rem">(${esc(si.colour)})</span>`:''}</div>
-          <div style="font-size:.72rem;color:var(--gold)">R$ ${fp(si.sale_price)}</div>
-        </div>
-        <div class="sale-item-qty-ctrl">
-          <button class="sale-item-qty-btn btn-out" onclick="changeSaleItemQty(${idx},-1)">−</button>
-          <span class="sale-item-qty-num">${si.qty}</span>
-          <button class="sale-item-qty-btn btn-in" onclick="changeSaleItemQty(${idx},1)">+</button>
-        </div>
-        <button class="sale-item-remove" onclick="removeSaleItem(${idx})">✕</button>
-      </div>`).join('')}</div>`
-    :`<div style="text-align:center;padding:24px;color:var(--muted);font-size:.83rem;border:1px dashed var(--border);border-radius:var(--radius);margin-bottom:14px">Nenhum item adicionado</div>`;
-
+  const channelHtml=`<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" data-ch="${esc(c)}" onclick="selectSaleChannel(this.dataset.ch)">${c}</div>`).join('')}</div>`;
   const total=saleItems.reduce((s,i)=>s+(Number(i.sale_price)*i.qty),0);
-  const channelHtml=`<div class="channel-chips">${channels().map(c=>`<div class="channel-chip${saleChannel===c?' selected':''}" onclick="selectSaleChannel('${c}')">${c}</div>`).join('')}</div>`;
-
   body.innerHTML=`
     <div class="form-group">
-      <div class="sale-step-label">${t('hello')}, ${esc(currentUser?.name||'Vendedor(a)')} 👋</div>
+      <div class="sale-step-label">${t('hello')}, ${esc(currentUser?.name||'')} 👋</div>
     </div>
     <div class="form-group">
       <label class="form-label">${currentLang==='pt'?'Itens da venda':'Sale items'}</label>
-      ${itemsHtml}
-      <button class="add-sale-item-btn" onclick="openItemPicker()">＋ ${t('addItem')}</button>
+      <div id="sale-basket-sp"></div>
+      <button class="add-sale-item-btn" onclick="openItemPicker()">+ ${t('addItem')}</button>
     </div>
-    ${saleItems.length?`<div class="form-group"><label class="form-label">${t('total')}: <span style="color:var(--gold);font-weight:600;font-size:1rem">R$ ${fp(total)}</span></label></div>`:''}
+    <div class="form-group">
+      <label class="form-label" id="sale-total-sp">${t('total')}: R$ ${fp(total)}</label>
+    </div>
     <div class="form-group">
       <label class="form-label">${t('salesChannel')}</label>
       ${channelHtml}
@@ -1631,10 +1672,8 @@ function renderSaleForm(){
       <label class="form-label">${t('paymentMethod')}</label>
       <select class="form-select" id="sp-payment">
         <option value="">${currentLang==='pt'?'Selecionar...':'Select...'}</option>
-        <option>Cash / Dinheiro</option>
-        <option>Card / Cartão</option>
-        <option>PIX</option>
-        <option>Transfer / Transferência</option>
+        <option>Cash / Dinheiro</option><option>Card / Cartao</option>
+        <option>PIX</option><option>Transfer / Transferencia</option>
         <option>${currentLang==='pt'?'Outro':'Other'}</option>
       </select>
     </div>
@@ -1644,6 +1683,7 @@ function renderSaleForm(){
     </div>
     <button class="btn btn-primary" id="confirm-sale-btn-sp" onclick="submitSale('sp')">✓ ${t('confirmSale')}</button>
   `;
+  renderSaleBasket('sale-basket-sp','sale-total-sp');
 }
 
 function onCustomerInputSP(val){
@@ -1909,8 +1949,12 @@ function setLang(lang) {
 }
 function applyLang() {
   document.documentElement.lang = currentLang==='pt'?'pt-BR':'en';
+  // Admin header
   document.getElementById('lang-en')?.classList.toggle('active', currentLang==='en');
   document.getElementById('lang-pt')?.classList.toggle('active', currentLang==='pt');
+  // Salesperson header
+  document.getElementById('sp-lang-en')?.classList.toggle('active', currentLang==='en');
+  document.getElementById('sp-lang-pt')?.classList.toggle('active', currentLang==='pt');
   applyTranslations();
 }
 function applyTranslations() {
@@ -1955,7 +1999,9 @@ function toggleDark(){
 }
 function applyTheme(){
   document.body.classList.toggle('dark',currentTheme==='dark');
-  const btn=document.getElementById('dark-btn');if(btn)btn.textContent=currentTheme==='dark'?'☀️':'🌙';
+  const icon = currentTheme==='dark'?'☀️':'🌙';
+  const btn=document.getElementById('dark-btn'); if(btn) btn.textContent=icon;
+  const spBtn=document.getElementById('sp-dark-btn'); if(spBtn) spBtn.textContent=icon;
 }
 function setView(v){
   currentView=v;localStorage.setItem('lama_view',v);
