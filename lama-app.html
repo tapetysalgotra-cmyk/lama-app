@@ -24,19 +24,24 @@ body.dark {
 body{font-family:var(--font);background:var(--ink);color:var(--text);min-height:100vh;transition:background .2s,color .2s;}
 
 /* ── LOGIN ── */
-#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--ink);}
-.login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px 28px;box-shadow:var(--shadow);}
-.login-logo{text-align:center;margin-bottom:28px;}
-.login-logo img{height:38px;object-fit:contain;}
-.login-logo-fallback{font-size:1.1rem;font-weight:700;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--ink);position:relative;overflow:hidden;}
+#login-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(154,122,74,.06) 0%,transparent 60%);pointer-events:none;}
+.login-brand{text-align:center;margin-bottom:32px;}
+.login-brand img{height:44px;object-fit:contain;margin-bottom:10px;}
+.login-brand-name{font-size:.62rem;font-weight:600;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
+.login-brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.06em;}
+.login-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px 28px;box-shadow:0 8px 40px rgba(0,0,0,.1);}
+.login-card-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:24px;}
 .login-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block;}
 .login-input{width:100%;padding:13px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:.88rem;outline:none;transition:border-color .15s;}
 .login-input:focus{border-color:var(--gold);}
 .login-group{margin-bottom:16px;}
-.login-btn{width:100%;padding:14px;background:var(--gold);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;letter-spacing:.04em;margin-top:8px;transition:opacity .15s;}
+.login-btn{width:100%;padding:14px;background:var(--gold);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;transition:opacity .15s;}
 .login-btn:active{opacity:.8;}
 .login-err{font-size:.75rem;color:var(--danger);text-align:center;margin-top:12px;min-height:18px;}
-.login-setup-link{text-align:center;margin-top:20px;font-size:.72rem;color:var(--muted);cursor:pointer;text-decoration:underline;}
+.login-setup-link{text-align:center;margin-top:16px;font-size:.7rem;color:var(--muted);cursor:pointer;opacity:.7;}
+.login-footer{text-align:center;margin-top:28px;font-size:.65rem;color:var(--muted);letter-spacing:.04em;opacity:.6;}
+.login-footer span{color:var(--gold);}
 
 /* ── APP SHELL ── */
 #app{display:none;flex-direction:column;min-height:100vh;}
@@ -58,7 +63,14 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:8px 
 .lang-btn.active{background:var(--gold);color:#fff;}
 .lang-btn .flag{font-size:.8rem;line-height:1;}
 
-/* ── STATS BAR ── */
+/* ── VIEW SWITCHER ── */
+.view-switcher{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);flex-shrink:0;}
+.view-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:.75rem;transition:background .15s,color .15s;}
+.view-btn.active{background:var(--gold);color:#fff;}
+/* ── USER ROLE BADGES ── */
+.user-role-admin{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.04em;background:rgba(154,122,74,.1);color:var(--gold);border:1px solid rgba(154,122,74,.3);}
+.user-role-sales{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.04em;background:rgba(46,158,106,.1);color:var(--success);border:1px solid rgba(46,158,106,.3);}
+.user-permissions{font-size:.68rem;color:var(--muted);margin-top:4px;line-height:1.5;}
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
 .stat{background:var(--card);padding:12px 6px;text-align:center;}
 .stat-value{font-size:1.15rem;font-weight:600;color:var(--gold);}
@@ -311,21 +323,30 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
      LOGIN SCREEN
 ═══════════════════════════════════════════════ -->
 <div id="login-screen">
+  <!-- Decorative gold accents -->
+  <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(154,122,74,.08),transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(154,122,74,.06),transparent 70%);pointer-events:none"></div>
+
+  <div class="login-brand">
+    <img src="https://static.wixstatic.com/media/31bd44_71bcb9a967f8490bbc3e0ed6d4864785~mv2.png/v1/fill/w_306,h_80,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20lama%20design%20HORIZONTAL_edited_edited.png"
+         alt="LAMA Design" onerror="this.style.display='none'" />
+    <div class="login-brand-name">Studio LAMA</div>
+    <div class="login-brand-sub">Sistema de Gestão de Estoque</div>
+  </div>
+
   <div class="login-card">
-    <div class="login-logo">
-      <img src="https://static.wixstatic.com/media/31bd44_71bcb9a967f8490bbc3e0ed6d4864785~mv2.png/v1/fill/w_306,h_80,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20lama%20design%20HORIZONTAL_edited_edited.png"
-           alt="LAMA Design" onerror="this.style.display='none';document.querySelector('.login-logo-fallback').style.display='block'" />
-      <div class="login-logo-fallback" style="display:none">LAMA Design</div>
-    </div>
-    <!-- First-time setup (hidden by default) -->
+    <div class="login-card-title">Acesso ao Sistema</div>
+
+    <!-- First-time setup -->
     <div id="setup-panel" style="display:none">
       <div class="form-group">
         <label class="login-label">URL do Google Apps Script</label>
         <input class="login-input" id="api-url-input" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
       </div>
       <button class="login-btn" onclick="saveApiUrl()">Salvar URL</button>
-      <div style="text-align:center;margin-top:12px;font-size:.72rem;color:var(--muted);cursor:pointer" onclick="document.getElementById('setup-panel').style.display='none'">← Voltar</div>
+      <div style="text-align:center;margin-top:14px;font-size:.72rem;color:var(--muted);cursor:pointer" onclick="document.getElementById('setup-panel').style.display='none';document.getElementById('login-panel').style.display='block'">← Voltar</div>
     </div>
+
     <!-- Login form -->
     <div id="login-panel">
       <div class="form-group">
@@ -340,8 +361,11 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
       <button class="login-btn" onclick="doLogin()" id="login-submit-btn">Entrar</button>
       <div class="login-err" id="login-err"></div>
     </div>
+
     <div class="login-setup-link" onclick="toggleSetup()">⚙ Configurar URL da API</div>
   </div>
+
+  <div class="login-footer">Desenvolvido para <span>Studio LAMA Design</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -357,10 +381,15 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
       <span class="role-badge" id="role-badge">Admin</span>
     </div>
     <div class="header-actions">
+      <div class="view-switcher" id="view-switcher-header">
+        <div class="view-btn active" id="vb-grid" onclick="setView('grid')" title="Grade">⊞</div>
+        <div class="view-btn" id="vb-list" onclick="setView('list')" title="Lista">☰</div>
+      </div>
       <div class="lang-toggle">
         <div class="lang-btn active" id="lang-en" onclick="setLang('en')"><span class="flag">🇬🇧</span> EN</div>
         <div class="lang-btn" id="lang-pt" onclick="setLang('pt')"><span class="flag">🇧🇷</span> PT</div>
       </div>
+      <div class="icon-btn" onclick="handleRefresh()" id="refresh-btn" title="Atualizar">↻</div>
       <div class="icon-btn" onclick="toggleDark()" id="dark-btn" title="Tema">🌙</div>
       <button class="logout-btn" onclick="doLogout()" id="logout-btn-main">Sair</button>
     </div>
@@ -375,6 +404,7 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
   <div class="tabs" id="main-tabs">
     <div class="tab active" data-tab="inventory" onclick="switchTab('inventory')">Estoque</div>
     <div class="tab" data-tab="sales" onclick="switchTab('sales')">Vendas</div>
+    <div class="tab" data-tab="lowstock" onclick="switchTab('lowstock')">⚠ Baixo</div>
     <div class="tab" data-tab="customers" onclick="switchTab('customers')">Clientes</div>
     <div class="tab" data-tab="reports" onclick="switchTab('reports')">Relatórios</div>
     <div class="tab admin-only" data-tab="users" onclick="switchTab('users')">Usuários</div>
@@ -422,45 +452,49 @@ main{flex:1;overflow-y:auto;padding:14px;padding-bottom:88px;}
     <div class="modal-body">
       <input type="hidden" id="edit-item-id" />
       <div class="form-group">
-        <label class="form-label" id="lbl-photo">Photo <span style="color:var(--muted);font-size:.68rem;text-transform:none" id="lbl-photo-note">(saved locally)</span></label>
+        <label class="form-label" id="lbl-photo">Foto <span style="color:var(--muted);font-size:.68rem;text-transform:none">(salva localmente)</span></label>
         <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
           <input type="file" id="photo-input" accept="image/*" capture="environment" onchange="handlePhotoSelect(this)" style="display:none" />
           <div style="font-size:1.8rem;margin-bottom:4px">📷</div>
-          <div class="upload-text">Toque para tirar foto ou escolher da galeria</div>
+          <div class="upload-text" id="upload-text-lbl">Toque para tirar foto ou escolher da galeria</div>
           <img id="photo-preview" class="photo-preview" alt="" />
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" id="lbl-name">Item Name *</label>
-        <input class="form-input" id="f-name" placeholder="e.g. Circle Earring" />
+        <label class="form-label">URL da Imagem <span style="color:var(--muted);font-size:.68rem;text-transform:none">(opcional — cole o link da imagem)</span></label>
+        <input class="form-input" id="f-photo-url" type="url" placeholder="https://..." oninput="previewUrlPhoto(this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="lbl-name">Nome do Item *</label>
+        <input class="form-input" id="f-name" placeholder="ex. Brinco Círculo" />
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" id="lbl-category">Category</label>
-          <select class="form-select" id="f-category"><option value="">Select...</option></select>
+          <label class="form-label" id="lbl-category">Categoria</label>
+          <select class="form-select" id="f-category"><option value="">Selecionar...</option></select>
         </div>
         <div class="form-group">
           <label class="form-label" id="lbl-material">Material</label>
-          <input class="form-input" id="f-material" placeholder="e.g. Surgical Steel" />
+          <input class="form-input" id="f-material" placeholder="ex. Aço Cirúrgico" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" id="lbl-purchase">Cost Price (R$)</label>
-          <input class="form-input" id="f-purchase-price" type="number" placeholder="0.00" min="0" step="0.01" />
+          <label class="form-label" id="lbl-purchase">Preço de Custo (R$)</label>
+          <input class="form-input" id="f-purchase-price" type="number" placeholder="0,00" min="0" step="0.01" />
         </div>
         <div class="form-group">
-          <label class="form-label" id="lbl-sale">Sale Price (R$)</label>
-          <input class="form-input" id="f-sale-price" type="number" placeholder="0.00" min="0" step="0.01" />
+          <label class="form-label" id="lbl-sale">Preço de Venda (R$)</label>
+          <input class="form-input" id="f-sale-price" type="number" placeholder="0,00" min="0" step="0.01" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" id="lbl-weight">Weight (grams)</label>
+          <label class="form-label" id="lbl-weight">Peso (gramas)</label>
           <input class="form-input" id="f-weight" type="number" placeholder="0.0" min="0" step="0.1" />
         </div>
         <div class="form-group">
-          <label class="form-label" id="lbl-qty-nocolour">Qty (no colours)</label>
+          <label class="form-label" id="lbl-qty-nocolour">Qtd. (sem cores)</label>
           <input class="form-input" id="f-quantity" type="number" placeholder="1" min="0" value="1" />
         </div>
       </div>
@@ -639,6 +673,7 @@ const PRESET_COLOURS=[
 ];
 const CHANNELS_PT=['Site','Loja Física','Feira/Evento','Retirada','Instagram','Outro'];
 const CHANNELS_EN=['Website','Physical Store','Trade Show / Event','Pickup','Instagram','Other'];
+const LOW_STOCK_THRESHOLD = 10;
 
 // ── TRANSLATIONS ──
 const T = {
@@ -794,7 +829,7 @@ let stockUpdateItem=null, stockUpdateDir='in';
 let currentPhotoData='', selectedColours=[], stockColourChanges={};
 let currentTheme = localStorage.getItem('lama_theme')||'light';
 let currentView = localStorage.getItem('lama_view')||'grid';
-let currentLang = localStorage.getItem('lama_lang')||'en';
+let currentLang = localStorage.getItem('lama_lang')||'pt';
 
 // ── SALE STATE (shared between admin modal and sales screen) ──
 let saleItems=[]; // [{item_id, name, sale_price, colour, qty}]
@@ -894,13 +929,15 @@ function doLogout() {
 function showAdminApp() {
   document.getElementById('app').style.display='flex';
   document.getElementById('sale-screen').style.display='none';
-  // Show/hide admin-only tabs
   const isAdmin = currentUser.role === 'admin';
   document.querySelectorAll('.admin-only').forEach(el => {
     el.style.display = isAdmin ? '' : 'none';
   });
-  document.getElementById('role-badge').textContent = isAdmin ? 'Admin' : currentUser.name || 'Manager';
+  document.getElementById('role-badge').textContent = isAdmin ? (currentLang==='pt'?'Admin':'Admin') : (currentUser.name || 'Manager');
   document.getElementById('role-badge').className = 'role-badge role-admin';
+  // Sync view buttons
+  document.getElementById('vb-grid')?.classList.toggle('active',currentView==='grid');
+  document.getElementById('vb-list')?.classList.toggle('active',currentView==='list');
   refreshAll();
 }
 
@@ -951,6 +988,7 @@ function renderTab() {
   fab.style.display='flex';
   if(currentTab==='inventory') { renderInventory(); fab.textContent='+'; }
   else if(currentTab==='sales') { renderSalesTab(); fab.textContent='+'; }
+  else if(currentTab==='lowstock') { renderLowStock(); fab.style.display='none'; }
   else if(currentTab==='customers') { renderCustomersTab(); fab.textContent='+'; }
   else if(currentTab==='reports') { renderReports(); fab.style.display='none'; }
   else if(currentTab==='users') { renderUsersTab(); fab.textContent='+'; }
@@ -996,15 +1034,15 @@ function filterInventory() {
 function renderItemCard(item) {
   const v=parseVariants(item.notes);
   const qty=v.length?totalVQty(v):Math.round(Number(item.quantity||0));
-  const qc=qty===0?'out':qty<=2?'low':'';
-  const cc=qty===0?'out-of-stock':qty<=2?'low-stock':'';
+  const qc=qty===0?'out':qty<=LOW_STOCK_THRESHOLD?'low':'';
+  const cc=qty===0?'out-of-stock':qty<=LOW_STOCK_THRESHOLD?'low-stock':'';
   const ql=qty===0?t('outOfStock'):`${t('qty')}: ${qty}`;
   const ph=item.photo_url
     ?`<div class="item-photo"><img src="${esc(item.photo_url)}" onerror="this.parentElement.textContent='💍'" /></div>`
     :`<div class="item-photo">💍</div>`;
   const dots=v.length?`<div class="colour-dots">${v.map(x=>`<span class="colour-dot ${x.qty==0?'out-variant':''}"><span class="dot" style="background:${esc(x.hex||getHex(x.name))}"></span>${esc(x.name)} (${x.qty})</span>`).join('')}</div>`:'';
   const vrows=v.map(x=>{
-    const vq=Math.round(Number(x.qty||0)),vc=vq===0?'out':vq<=2?'low':'';
+    const vq=Math.round(Number(x.qty||0)),vc=vq===0?'out':vq<=LOW_STOCK_THRESHOLD?'low':'';
     return`<div class="variant-row"><div class="variant-colour-info"><div class="variant-dot" style="background:${esc(x.hex||getHex(x.name))}"></div><span class="variant-name">${esc(x.name)}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="variant-qty-num ${vc}">${vq}</span><div class="variant-btns"><button class="v-btn v-btn-in" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',1)">+</button><button class="v-btn v-btn-out" onclick="event.stopPropagation();qvu('${item.item_id}','${esc(x.name)}',-1)">−</button></div></div></div>`;
   }).join('');
   return`<div class="item-card ${cc}" id="card-${item.item_id}">
@@ -1065,6 +1103,33 @@ function renderSalesTab() {
       </div>
     </div>`;
   }).join('')+'</div>';
+}
+
+function renderLowStock() {
+  const main = document.getElementById('main-content');
+  const pt = currentLang==='pt';
+  const lowItems = allItems.filter(i=>{
+    const v=parseVariants(i.notes);
+    const qty=v.length?totalVQty(v):Math.round(Number(i.quantity||0));
+    return qty <= LOW_STOCK_THRESHOLD;
+  });
+  if(!lowItems.length){
+    main.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><p>${pt?'Todos os itens bem abastecidos!':'All items well stocked!'}</p></div>`;
+    return;
+  }
+  // Sort: out of stock first, then by qty ascending
+  lowItems.sort((a,b)=>{
+    const qa=parseVariants(a.notes).length?totalVQty(parseVariants(a.notes)):Math.round(Number(a.quantity||0));
+    const qb=parseVariants(b.notes).length?totalVQty(parseVariants(b.notes)):Math.round(Number(b.quantity||0));
+    return qa-qb;
+  });
+  main.innerHTML=`
+    <div style="padding:10px 14px 0;font-size:.72rem;color:var(--danger);font-weight:500">
+      ${lowItems.length} ${pt?'item(s) com estoque baixo (abaixo de':'item(s) low stock (below'} ${LOW_STOCK_THRESHOLD} ${pt?'unidades)':'units)'}
+    </div>
+    <div class="${currentView==='list'?'items-list':'items-grid'}" style="margin-top:10px">
+      ${lowItems.map(renderItemCard).join('')}
+    </div>`;
 }
 
 // ── SALE MODAL (admin) ──
@@ -1494,19 +1559,33 @@ async function renderUsersTab(){
   const res=await callApi({action:'getUsers'});
   allUsers=res.users||[];
   if(!allUsers.length){
-    main.innerHTML=`<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário ainda.</p></div>`;
+    main.innerHTML=`<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário ainda.<br>Toque + para adicionar.</p></div>`;
     return;
   }
+  const adminPerms = currentLang==='pt'
+    ? '✓ Estoque · ✓ Vendas · ✓ Clientes · ✓ Relatórios · ✓ Usuários'
+    : '✓ Inventory · ✓ Sales · ✓ Customers · ✓ Reports · ✓ Users';
+  const salesPerms = currentLang==='pt'
+    ? '✓ Registrar vendas · ✗ Estoque · ✗ Relatórios · ✗ Configurações'
+    : '✓ Register sales · ✗ Inventory · ✗ Reports · ✗ Settings';
   main.innerHTML=allUsers.map(u=>`
     <div class="user-card">
       <div class="user-info">
-        <div class="user-avatar">${(u.name||'?')[0].toUpperCase()}</div>
+        <div class="user-avatar" style="background:${u.role==='admin'?'rgba(154,122,74,.12)':'rgba(46,158,106,.12)'}">
+          ${(u.name||'?')[0].toUpperCase()}
+        </div>
         <div>
-          <div style="font-size:.88rem;font-weight:600">${esc(u.name)}</div>
-          <div style="font-size:.72rem;color:var(--muted)">@${esc(u.username)} · ${u.role==='admin'?'Administrador':'Vendedor'}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:.88rem;font-weight:600">${esc(u.name)}</span>
+            <span class="${u.role==='admin'?'user-role-admin':'user-role-sales'}">
+              ${u.role==='admin'?(currentLang==='pt'?'Administrador':'Admin'):(currentLang==='pt'?'Vendedor(a)':'Salesperson')}
+            </span>
+          </div>
+          <div style="font-size:.7rem;color:var(--muted)">@${esc(u.username)}</div>
+          <div class="user-permissions">${u.role==='admin'?adminPerms:salesPerms}</div>
         </div>
       </div>
-      <button class="action-btn btn-edit" onclick="openEditUser('${u.user_id}')">Editar</button>
+      <button class="action-btn btn-edit" onclick="openEditUser('${u.user_id}')" style="flex-shrink:0">${currentLang==='pt'?'Editar':'Edit'}</button>
     </div>`).join('');
 }
 
@@ -1559,48 +1638,94 @@ async function confirmDeleteUser(){
 // ── SETTINGS ──
 function renderSettings(){
   const main=document.getElementById('main-content');
+  const emailEnabled = localStorage.getItem('lama_email_enabled')!=='false';
+  const emailTime = localStorage.getItem('lama_email_time')||'22:30';
+  const pt = currentLang==='pt';
   main.innerHTML=`
     <div class="settings-section">
-      <div class="section-title">${t('dailyReport')}</div>
+      <div class="section-title">${pt?'Relatório Diário por E-mail':'Daily Email Report'}</div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">${t('autoSend')}</div>
-          <div class="settings-sublabel">${t('autoSendSub')}</div>
+          <div class="settings-label">${pt?'Envio automático':'Automatic send'}</div>
+          <div class="settings-sublabel">${pt?'Liga/desliga o envio diário':'Enable or disable daily sending'}</div>
         </div>
-        <span style="font-size:.75rem;color:var(--success)">${t('active')}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.72rem;color:${emailEnabled?'var(--success)':'var(--danger)'}">
+            ${emailEnabled?(pt?'Ativo':'Active'):(pt?'Pausado':'Paused')}
+          </span>
+          <button class="action-btn ${emailEnabled?'btn-out':'btn-in'}" onclick="toggleEmailReport()">
+            ${emailEnabled?(pt?'Pausar':'Pause'):(pt?'Ativar':'Enable')}
+          </button>
+        </div>
       </div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">${t('sendNow')}</div>
-          <div class="settings-sublabel">${t('sendNowSub')}</div>
+          <div class="settings-label">${pt?'Horário do envio':'Send time'}</div>
+          <div class="settings-sublabel">${pt?'Fuso horário de Recife (UTC-3)':'Recife timezone (UTC-3)'}</div>
         </div>
-        <button class="action-btn btn-in" onclick="sendReportNow()">${t('send')}</button>
+        <input type="time" value="${emailTime}"
+               style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font);font-size:.82rem"
+               onchange="saveEmailTime(this.value)" />
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">${pt?'Enviar relatório agora':'Send report now'}</div>
+          <div class="settings-sublabel">${pt?'Envia o relatório de hoje imediatamente':'Sends today\'s report immediately'}</div>
+        </div>
+        <button class="action-btn btn-in" onclick="sendReportNow()">${pt?'Enviar':'Send'}</button>
       </div>
     </div>
     <div class="settings-section">
-      <div class="section-title">${t('connection')}</div>
+      <div class="section-title">${pt?'Estoque Baixo':'Low Stock'}</div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">${t('apiUrl')}</div>
-          <div class="settings-sublabel" style="word-break:break-all;max-width:220px">${esc(API_URL)}</div>
+          <div class="settings-label">${pt?'Limite de alerta':'Alert threshold'}</div>
+          <div class="settings-sublabel">${pt?'Itens com quantidade abaixo deste valor aparecem em vermelho':'Items below this qty show in red'}</div>
         </div>
-        <button class="action-btn btn-edit" onclick="promptChangeUrl()">${t('change')}</button>
+        <span style="font-size:.88rem;font-weight:600;color:var(--danger)">${LOW_STOCK_THRESHOLD} ${pt?'un.':'units'}</span>
       </div>
     </div>
     <div class="settings-section">
-      <div class="section-title">${t('appearance')}</div>
+      <div class="section-title">${pt?'Conexão':'Connection'}</div>
       <div class="settings-row">
-        <div class="settings-label">${t('darkTheme')}</div>
-        <button class="icon-btn" onclick="toggleDark()" id="dark-btn-settings">${currentTheme==='dark'?'☀️':'🌙'}</button>
+        <div>
+          <div class="settings-label">${pt?'URL da API':'API URL'}</div>
+          <div class="settings-sublabel" style="word-break:break-all;max-width:200px;font-size:.65rem">${esc(API_URL.slice(0,60))}...</div>
+        </div>
+        <button class="action-btn btn-edit" onclick="promptChangeUrl()">${pt?'Alterar':'Change'}</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="section-title">${pt?'Aparência':'Appearance'}</div>
+      <div class="settings-row">
+        <div class="settings-label">${pt?'Tema escuro':'Dark theme'}</div>
+        <button class="icon-btn" onclick="toggleDark()">${currentTheme==='dark'?'☀️':'🌙'}</button>
       </div>
       <div class="settings-row">
-        <div class="settings-label">${t('stockLayout')}</div>
+        <div class="settings-label">${pt?'Layout de estoque':'Stock layout'}</div>
         <div style="display:flex;gap:6px">
-          <button class="action-btn ${currentView==='grid'?'btn-in':'btn-edit'}" onclick="setView('grid')">${t('grid')}</button>
-          <button class="action-btn ${currentView==='list'?'btn-in':'btn-edit'}" onclick="setView('list')">${t('list')}</button>
+          <button class="action-btn ${currentView==='grid'?'btn-in':'btn-edit'}" onclick="setView('grid')">${pt?'Grade':'Grid'}</button>
+          <button class="action-btn ${currentView==='list'?'btn-in':'btn-edit'}" onclick="setView('list')">${pt?'Lista':'List'}</button>
         </div>
       </div>
     </div>`;
+}
+
+function toggleEmailReport(){
+  const current = localStorage.getItem('lama_email_enabled')!=='false';
+  localStorage.setItem('lama_email_enabled', current?'false':'true');
+  // Tell backend
+  const enabled = !current;
+  callApi({action:'setEmailEnabled', enabled});
+  showToast(enabled?(currentLang==='pt'?'Relatório ativado ✓':'Report enabled ✓'):(currentLang==='pt'?'Relatório pausado':'Report paused'), enabled?'success':'');
+  renderSettings();
+}
+
+function saveEmailTime(time){
+  localStorage.setItem('lama_email_time', time);
+  callApi({action:'setEmailTime', time});
+  showToast(currentLang==='pt'?'Horário salvo ✓':'Time saved ✓','success');
+}
 }
 
 async function sendReportNow(){
@@ -1730,6 +1855,8 @@ function openEditItem(id){
   document.getElementById('f-quantity').value=item.quantity||1;
   document.getElementById('f-description').value=stripVariants(item.notes)||'';
   currentPhotoData=item.photo_url||'';
+  const urlField=document.getElementById('f-photo-url');
+  if(urlField) urlField.value = currentPhotoData.startsWith('http') ? currentPhotoData : '';
   if(currentPhotoData){const p=document.getElementById('photo-preview');p.src=currentPhotoData;p.style.display='block';}
   selectedColours=parseVariants(item.notes).map(v=>({...v}));
   renderPresets();renderSelectedList();
@@ -1737,7 +1864,7 @@ function openEditItem(id){
 }
 
 function clearItemForm(){
-  ['f-name','f-material','f-purchase-price','f-sale-price','f-weight','f-description'].forEach(id=>{
+  ['f-name','f-material','f-purchase-price','f-sale-price','f-weight','f-description','f-photo-url'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
   const fq=document.getElementById('f-quantity');if(fq)fq.value=1;
@@ -1758,13 +1885,19 @@ async function saveItem(){
     notes=(notes?notes+' ':'')+serializeVariants(selectedColours);
     qty=totalVQty(selectedColours);
   }
+  // Use URL field if no local photo captured
+  const urlFieldVal = document.getElementById('f-photo-url')?.value?.trim()||'';
+  if(urlFieldVal && !currentPhotoData) currentPhotoData = urlFieldVal;
+
   const params={
     name,category:document.getElementById('f-category').value,
     material:document.getElementById('f-material').value,
     purchase_price:document.getElementById('f-purchase-price').value,
     sale_price:document.getElementById('f-sale-price').value,
     weight_grams:document.getElementById('f-weight').value,
-    quantity:qty,notes
+    quantity:qty,notes,
+    // Save URL directly to sheet so it works on all devices
+    photo_url: currentPhotoData.startsWith('http') ? currentPhotoData : ''
   };
   const editId=document.getElementById('edit-item-id').value;
   if(editId){params.action='updateItem';params.item_id=editId;}
@@ -1773,7 +1906,7 @@ async function saveItem(){
   btn.disabled=false;
   if(res.success){
     const savedId=editId||res.item_id;
-    if(currentPhotoData)savePhotoLocal(savedId,currentPhotoData);
+    if(currentPhotoData) savePhotoLocal(savedId,currentPhotoData);
     closeModal('item-modal');
     showToast(editId?t('itemUpdated'):t('itemAdded'),'success');
     await refreshAll();
@@ -1905,6 +2038,13 @@ function renderSelectedList(){
 }
 
 // ── PHOTO ──
+function previewUrlPhoto(url) {
+  if(!url) return;
+  currentPhotoData = url;
+  const p = document.getElementById('photo-preview');
+  if(p) { p.src = url; p.style.display = 'block'; }
+}
+
 function handlePhotoSelect(input){
   const file=input.files[0];if(!file)return;
   resizePhoto(file,d=>{currentPhotoData=d;const p=document.getElementById('photo-preview');p.src=d;p.style.display='block';});
@@ -1992,6 +2132,16 @@ function applyTranslations() {
 }
 
 // ── THEME ──
+function handleRefresh() {
+  const btn = document.getElementById('refresh-btn');
+  if(btn) {
+    btn.style.transition = 'transform 0.6s ease';
+    btn.style.transform = 'rotate(360deg)';
+    setTimeout(() => { btn.style.transition = ''; btn.style.transform = ''; }, 650);
+  }
+  refreshAll();
+}
+
 function toggleDark(){
   currentTheme=currentTheme==='dark'?'light':'dark';
   localStorage.setItem('lama_theme',currentTheme);
@@ -2004,7 +2154,10 @@ function applyTheme(){
   const spBtn=document.getElementById('sp-dark-btn'); if(spBtn) spBtn.textContent=icon;
 }
 function setView(v){
-  currentView=v;localStorage.setItem('lama_view',v);
+  currentView=v;
+  localStorage.setItem('lama_view',v);
+  document.getElementById('vb-grid')?.classList.toggle('active',v==='grid');
+  document.getElementById('vb-list')?.classList.toggle('active',v==='list');
   if(currentTab==='inventory')renderInventory();
 }
 
